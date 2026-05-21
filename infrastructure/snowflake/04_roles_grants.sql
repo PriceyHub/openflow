@@ -11,7 +11,7 @@ CREATE STORAGE INTEGRATION IF NOT EXISTS OPENFLOW_S3_INTEGRATION
   TYPE = EXTERNAL_STAGE
   STORAGE_PROVIDER = 'S3'
   ENABLED = TRUE
-  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::REPLACE_ACCOUNT_ID:role/openflow-snowflake-s3-dev'
+  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::866586366759:role/openflow-snowflake-s3-dev'
   STORAGE_ALLOWED_LOCATIONS = (
     's3://openflow-staging-dev-eu-west-2/',
     's3://openflow-staging-test-eu-west-2/',
