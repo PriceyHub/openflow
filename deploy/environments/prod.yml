@@ -1,0 +1,20 @@
+environment: prod
+nifi_url: "https://REPLACE_NIFI_PROD_IP:8443"
+nifi_username: "admin"
+nifi_registry_url: "http://REPLACE_REGISTRY_IP:18080"
+aws_region: eu-west-2
+aws_secrets_prefix: "openflow/prod"
+snowflake_account: "cngfczx-ow26289"
+
+flows:
+  - name: "Salesforce Ingestion"
+    flow_file: "../nifi/flows/salesforce_ingestion.json"
+    parameter_context_file: "../nifi/parameter_contexts/prod.json"
+    registry_bucket: "openflow-flows"
+    process_group_name: "Salesforce Ingestion [prod]"
+
+  - name: "PostgreSQL CDC"
+    flow_file: "../nifi/flows/postgres_cdc.json"
+    parameter_context_file: "../nifi/parameter_contexts/prod.json"
+    registry_bucket: "openflow-flows"
+    process_group_name: "PostgreSQL CDC [prod]"

@@ -1,0 +1,87 @@
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "eu-west-2"
+}
+
+variable "environment" {
+  description = "Deployment environment: dev | test | prod"
+  type        = string
+  validation {
+    condition     = contains(["dev", "test", "prod"], var.environment)
+    error_message = "Environment must be dev, test, or prod."
+  }
+}
+
+variable "vpc_id" {
+  description = "Existing VPC ID"
+  type        = string
+}
+
+variable "private_subnet_ids" {
+  description = "Private subnet IDs for NiFi instances"
+  type        = list(string)
+}
+
+variable "public_subnet_ids" {
+  description = "Public subnet IDs for load balancer"
+  type        = list(string)
+}
+
+variable "allowed_cidr_blocks" {
+  description = "CIDR blocks allowed to reach NiFi UI"
+  type        = list(string)
+  default     = []
+}
+
+variable "key_pair_name" {
+  description = "EC2 key pair name for SSH access"
+  type        = string
+}
+
+variable "nifi_instance_type" {
+  description = "EC2 instance type for NiFi nodes"
+  type        = string
+  default     = "t3.large"
+}
+
+variable "nifi_registry_instance_type" {
+  description = "EC2 instance type for NiFi Registry"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "nifi_version" {
+  description = "Apache NiFi version"
+  type        = string
+  default     = "2.0.0"
+}
+
+variable "nifi_registry_version" {
+  description = "Apache NiFi Registry version"
+  type        = string
+  default     = "2.0.0"
+}
+
+variable "nifi_registry_host" {
+  description = "NiFi Registry hostname/IP (shared across environments)"
+  type        = string
+  default     = ""
+}
+
+variable "rds_security_group_id" {
+  description = "Security group ID of the existing RDS Postgres instance"
+  type        = string
+}
+
+variable "snowflake_account" {
+  description = "Snowflake account identifier"
+  type        = string
+  default     = "cngfczx-ow26289"
+}
+
+variable "tags" {
+  description = "Additional tags to apply to all resources"
+  type        = map(string)
+  default     = {}
+}

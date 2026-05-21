@@ -1,0 +1,34 @@
+{
+  "salesforce-ingestion-params": {
+    "salesforce_instance_url": "https://REPLACE.my.salesforce.com",
+    "salesforce_client_id": "REPLACE_FROM_AWS_SECRETS",
+    "salesforce_client_secret": "REPLACE_FROM_AWS_SECRETS",
+    "salesforce_api_version": "59.0",
+    "snowflake_account": "cngfczx-ow26289",
+    "snowflake_database": "OPENFLOW_PROD",
+    "snowflake_schema": "RAW",
+    "snowflake_warehouse": "OPENFLOW_INGEST_WH_PROD",
+    "snowflake_username": "OPENFLOW_NIFI_SVC",
+    "snowflake_password": "REPLACE_FROM_AWS_SECRETS",
+    "s3_staging_bucket": "openflow-staging-prod-eu-west-2",
+    "s3_region": "eu-west-2",
+    "batch_id_attribute": "${now():toNumber()}"
+  },
+  "postgres-cdc-params": {
+    "postgres_host": "REPLACE_FROM_AWS_SECRETS",
+    "postgres_port": "5432",
+    "postgres_database": "REPLACE_FROM_AWS_SECRETS",
+    "postgres_username": "REPLACE_FROM_AWS_SECRETS",
+    "postgres_password": "REPLACE_FROM_AWS_SECRETS",
+    "postgres_slot_name": "openflow_prod_slot",
+    "postgres_publication": "openflow_pub",
+    "snowflake_account": "cngfczx-ow26289",
+    "snowflake_database": "OPENFLOW_PROD",
+    "snowflake_schema": "POSTGRES_CDC",
+    "snowflake_warehouse": "OPENFLOW_INGEST_WH_PROD",
+    "snowflake_username": "OPENFLOW_NIFI_SVC",
+    "snowflake_password": "REPLACE_FROM_AWS_SECRETS",
+    "s3_staging_bucket": "openflow-staging-prod-eu-west-2",
+    "s3_region": "eu-west-2"
+  }
+}

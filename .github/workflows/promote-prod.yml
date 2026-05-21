@@ -1,0 +1,153 @@
+name: Promote to Prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      flow:
+        description: "Flow to promote (leave blank for all)"
+        required: false
+        default: ""
+      registry_version:
+        description: "Registry version to promote (required — pin to a tested version)"
+        required: true
+      confirm:
+        description: "Type 'promote-to-prod' to confirm"
+        required: true
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+  AWS_REGION: eu-west-2
+
+jobs:
+  safety_check:
+    name: Safety check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "promote-to-prod" ]; then
+            echo "::error::Confirmation phrase incorrect. Expected 'promote-to-prod'."
+            exit 1
+          fi
+          echo "Confirmation accepted — proceeding with prod promotion by ${{ github.actor }}"
+
+  require_approval:
+    name: Gate — senior approval required
+    runs-on: ubuntu-latest
+    needs: safety_check
+    environment: prod       # GitHub environment with required_reviewers (2+ approvers)
+    steps:
+      - name: Approval granted
+        run: echo "Prod promotion approved by ${{ github.actor }}"
+
+  deploy:
+    name: Deploy to Prod NiFi
+    runs-on: ubuntu-latest
+    needs: require_approval
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install deploy dependencies
+        run: pip install -r deploy/requirements.txt
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_PROD_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to Prod (pinned version)
+        env:
+          NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_PROD_ADMIN_PASSWORD }}
+        run: |
+          FLOW_ARG=""
+          if [ -n "${{ github.event.inputs.flow }}" ]; then
+            FLOW_ARG="--flow ${{ github.event.inputs.flow }}"
+          fi
+          python deploy/deploy.py \
+            --env prod \
+            --version ${{ github.event.inputs.registry_version }} \
+            $FLOW_ARG
+        working-directory: ${{ github.workspace }}
+
+  smoke_test:
+    name: Smoke tests against Prod
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install test dependencies
+        run: pip install -r tests/requirements.txt
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_PROD_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run smoke tests (schema + basic connectivity only)
+        env:
+          NIFI_URL: ${{ secrets.NIFI_PROD_URL }}
+          NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_PROD_ADMIN_PASSWORD }}
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_DATABASE: OPENFLOW_PROD
+          SNOWFLAKE_WAREHOUSE: OPENFLOW_INGEST_WH_PROD
+          SNOWFLAKE_SCHEMA: RAW
+          PG_HOST: ${{ secrets.PG_HOST }}
+          PG_PORT: "5432"
+          PG_DATABASE: ${{ secrets.PG_DATABASE }}
+          PG_USER: ${{ secrets.PG_USER }}
+          PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          S3_STAGING_BUCKET: ${{ secrets.S3_STAGING_BUCKET_PROD }}
+          CDC_PROPAGATION_WAIT: "90"
+        run: |
+          pytest tests/ -v --timeout=300 \
+            -k "schema or land_in_snowflake" \
+            --tb=short \
+            --junitxml=test-results/prod-smoke-results.xml
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload smoke test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-smoke-results
+          path: test-results/
+
+  notify_success:
+    name: Summarise
+    runs-on: ubuntu-latest
+    needs: [deploy, smoke_test]
+    if: success()
+    steps:
+      - name: Summarise
+        run: |
+          echo "### Prod Promotion Succeeded" >> $GITHUB_STEP_SUMMARY
+          echo "- Promoted by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Registry version: ${{ github.event.inputs.registry_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Smoke tests passed" >> $GITHUB_STEP_SUMMARY
