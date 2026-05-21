@@ -98,6 +98,11 @@ resource "aws_iam_role_policy_attachment" "nifi_ssm" {
   policy_arn = aws_iam_policy.nifi_ssm.arn
 }
 
+resource "aws_iam_role_policy_attachment" "nifi_ssm_core" {
+  role       = aws_iam_role.nifi.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 resource "aws_iam_instance_profile" "nifi" {
   name = "openflow-nifi-${var.environment}"
   role = aws_iam_role.nifi.name
