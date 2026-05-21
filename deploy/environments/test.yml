@@ -1,7 +1,7 @@
 environment: test
 nifi_url: "https://REPLACE_NIFI_TEST_IP:8443"
 nifi_username: "admin"
-nifi_registry_url: "http://REPLACE_REGISTRY_IP:18080"
+nifi_registry_url: "http://172.31.20.146:18080"
 aws_region: eu-west-2
 aws_secrets_prefix: "openflow/test"
 snowflake_account: "cngfczx-ow26289"

@@ -1,7 +1,8 @@
 environment: dev
-nifi_url: "https://REPLACE_NIFI_DEV_IP:8443"
+nifi_url: "https://127.0.0.1:8443"
 nifi_username: "admin"
-nifi_registry_url: "http://REPLACE_REGISTRY_IP:18080"
+nifi_registry_url: "http://127.0.0.1:18080"
+nifi_registry_internal_url: "http://172.31.20.146:18080"
 aws_region: eu-west-2
 aws_secrets_prefix: "openflow/dev"
 snowflake_account: "cngfczx-ow26289"

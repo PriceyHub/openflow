@@ -50,7 +50,7 @@ def configure_nipyapi(nifi_url: str, registry_url: str, username: str, password:
     logger.info("nipyapi configured — NiFi: %s | Registry: %s", nifi_url, registry_url)
 
 
-def wait_for_nifi(nifi_url: str, timeout: int = 120) -> None:
+def wait_for_nifi(nifi_url: str, timeout: int = 600) -> None:
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -59,8 +59,9 @@ def wait_for_nifi(nifi_url: str, timeout: int = 120) -> None:
                 verify=False,
                 timeout=5,
             )
-            if resp.status_code == 200:
-                logger.info("NiFi is ready at %s", nifi_url)
+            # 200 = up + authed, 401 = up but requires auth — both mean NiFi is ready
+            if resp.status_code in (200, 401):
+                logger.info("NiFi is ready at %s (HTTP %d)", nifi_url, resp.status_code)
                 return
         except requests.exceptions.ConnectionError:
             pass

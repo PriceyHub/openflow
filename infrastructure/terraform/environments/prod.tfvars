@@ -11,7 +11,7 @@ key_pair_name      = "openflow-prod"
 
 rds_security_group_id = "sg-REPLACE"
 
-nifi_registry_host = "REPLACE_WITH_DEV_REGISTRY_IP"
+nifi_registry_host = "172.31.20.146"
 
 allowed_cidr_blocks = ["10.0.0.0/8"]
 

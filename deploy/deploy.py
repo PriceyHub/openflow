@@ -82,11 +82,26 @@ def register_flow_in_registry(
         )
         logger.info("Created registry flow: %s", flow_name)
 
+    # Determine next version number
+    flow_id = getattr(target_flow, "identifier", None) or getattr(target_flow, "id", None)
+    bucket_id = getattr(target_flow, "bucket_identifier", None) or bucket.identifier
+    try:
+        latest = nipyapi.versioning.get_latest_flow_version(flow=target_flow)
+        next_version_num = latest.snapshot_metadata.version + 1
+    except Exception:
+        next_version_num = 1
+
     # Commit new version
     new_version = nipyapi.versioning.create_flow_version(
         flow=target_flow,
         flow_snapshot=nipyapi.registry.models.VersionedFlowSnapshot(
             flow_contents=flow_contents,
+            snapshot_metadata=nipyapi.registry.models.VersionedFlowSnapshotMetadata(
+                bucket_identifier=bucket_id,
+                flow_identifier=flow_id,
+                version=next_version_num,
+                comments=description,
+            ),
         ),
     )
     logger.info(
@@ -128,21 +143,27 @@ def deploy_flow_to_nifi(
         logger.info("Updated and restarted: %s", process_group_name)
         return updated
 
-    # Create new process group from registry
+    # Create new process group from registry.
+    # Use the NiFi REST API directly — nipyapi.versioning.deploy_flow_version
+    # internally calls list_flow_versions which proxies through NiFi's registry
+    # client and can fail when the client URL was recently updated (stale pool).
     import random
-    position = nipyapi.nifi.models.PositionDTO(
-        x=float(random.randint(0, 800)),
-        y=float(random.randint(0, 600)),
-    )
-
-    pg = nipyapi.versioning.deploy_flow_version(
-        parent_id=root_pg_id,
-        location=position,
-        bucket_id=bucket_id,
-        flow_id=flow_id,
-        reg_client_id=registry_client_id,
-        version=version,
-    )
+    x = float(random.randint(0, 800))
+    y = float(random.randint(0, 600))
+    body = {
+        "revision": {"version": 0},
+        "component": {
+            "name": process_group_name,
+            "position": {"x": x, "y": y},
+            "versionControlInformation": {
+                "registryId": registry_client_id,
+                "bucketId": bucket_id,
+                "flowId": flow_id,
+                "version": version,
+            },
+        },
+    }
+    pg = nipyapi.nifi.ProcessGroupsApi().create_process_group(id=root_pg_id, body=body)
 
     _update_parameter_context(pg.id, context_id)
     time.sleep(2)
@@ -184,22 +205,103 @@ def _start_process_group(pg_id: str) -> None:
         logger.warning("Could not start PG %s: %s", pg_id, exc)
 
 
-def get_or_create_registry_client(registry_url: str) -> object:
-    """Ensure NiFi has a Registry client pointing at the shared registry."""
-    clients = nipyapi.versioning.list_registry_clients()
-    if clients:
-        for c in clients:
-            if c.component.uri == registry_url or registry_url in (c.component.uri or ""):
-                logger.info("Registry client exists: %s", c.component.name)
-                return c
+def get_or_create_registry_client(registry_url: str, registry_internal_url: str) -> object:
+    """Ensure NiFi has a Registry client pointing at the shared registry.
 
-    client = nipyapi.versioning.create_registry_client(
-        name="OpenFlow Registry",
-        uri=registry_url,
-        description="Shared NiFi Registry for OpenFlow flows",
-    )
-    logger.info("Created registry client: %s → %s", client.component.name, registry_url)
-    return client
+    registry_url: URL this script uses (may be an SSM tunnel).
+    registry_internal_url: URL NiFi itself must use to reach the registry over the VPC.
+    """
+
+    def _find_by_name(client_list: list) -> object:
+        for c in client_list:
+            name = getattr(getattr(c, "component", None), "name", "") or ""
+            if name == "OpenFlow Registry":
+                return c
+        return None
+
+    def _get_client_uri(c: object) -> str:
+        comp = getattr(c, "component", None)
+        # NiFi 2.0 stores URL in component.properties.url; component.uri is the API self-link
+        props = getattr(comp, "properties", {}) or {}
+        prop_url = props.get("url", "") or props.get("uri", "") or ""
+        # NiFi 1.x stored it directly on component.uri
+        legacy_uri = getattr(comp, "uri", "") or ""
+        # Prefer properties.url; fall back to legacy uri only if it looks like a registry URL
+        if prop_url:
+            return prop_url
+        if legacy_uri and "nifi-api" not in legacy_uri:
+            return legacy_uri
+        return ""
+
+    def _update_client_uri(c: object) -> object:
+        """PUT updated URL back to NiFi using the NiFi 2.0 properties.url format."""
+        import requests as _requests
+        try:
+            revision = getattr(c, "revision", None)
+            rev_version = getattr(revision, "version", 0)
+            client_id = getattr(c, "id", None)
+            # NiFi 2.0 stores the registry URL in component.properties.url, not component.uri
+            body = {
+                "revision": {"version": rev_version},
+                "id": client_id,
+                "component": {
+                    "id": client_id,
+                    "name": "OpenFlow Registry",
+                    "description": "Shared NiFi Registry for OpenFlow flows",
+                    "type": "org.apache.nifi.registry.flow.NifiRegistryFlowRegistryClient",
+                    "bundle": {
+                        "group": "org.apache.nifi",
+                        "artifact": "nifi-flow-registry-client-nar",
+                        "version": "2.0.0",
+                    },
+                    "properties": {"url": registry_internal_url},
+                },
+            }
+            nifi_base = nipyapi.config.nifi_config.host  # ends with /nifi-api
+            token = (nipyapi.config.nifi_config.api_key or {}).get("tokenAuth", "")
+            resp = _requests.put(
+                f"{nifi_base}/controller/registry-clients/{client_id}",
+                json=body,
+                headers={"Authorization": f"Bearer {token}"},
+                verify=False,
+                timeout=15,
+            )
+            resp.raise_for_status()
+            logger.info("Updated registry client URL → %s", registry_internal_url)
+        except Exception as exc:
+            logger.warning("Could not update registry client URI: %s", exc)
+        return c
+
+    clients = nipyapi.versioning.list_registry_clients()
+    client_list = getattr(clients, "registries", None) or []
+    existing = _find_by_name(client_list)
+
+    if existing:
+        current_uri = _get_client_uri(existing)
+        if registry_internal_url not in current_uri:
+            logger.info("Registry client URI mismatch (%s) — updating to %s", current_uri, registry_internal_url)
+            existing = _update_client_uri(existing)
+        else:
+            logger.info("Registry client exists with correct URI: %s", current_uri)
+        return existing
+
+    try:
+        client = nipyapi.versioning.create_registry_client(
+            name="OpenFlow Registry",
+            uri=registry_internal_url,
+            description="Shared NiFi Registry for OpenFlow flows",
+        )
+        logger.info("Created registry client: %s → %s", client.component.name, registry_internal_url)
+        return client
+    except (ValueError, Exception) as exc:
+        if "already exists" not in str(exc):
+            raise
+        clients = nipyapi.versioning.list_registry_clients()
+        client_list = getattr(clients, "registries", None) or []
+        existing = _find_by_name(client_list)
+        if existing:
+            return existing
+        raise RuntimeError("Registry client 'OpenFlow Registry' reported as duplicate but not found in list") from exc
 
 
 @click.command()
@@ -217,7 +319,7 @@ def main(env: str, flow: Optional[str], dry_run: bool, skip_secrets: bool, targe
     nifi_username = config["nifi_username"]
 
     # Wait for NiFi to be up (useful in CI pipelines after infra provisioning)
-    wait_for_nifi(nifi_url, timeout=180)
+    wait_for_nifi(nifi_url, timeout=600)
 
     nifi_password = _get_nifi_password(config)
     configure_nipyapi(nifi_url, registry_url, nifi_username, nifi_password)
@@ -252,8 +354,10 @@ def main(env: str, flow: Optional[str], dry_run: bool, skip_secrets: bool, targe
     # Create/update parameter contexts in NiFi
     context_ids = deploy_all_parameter_contexts(resolved_params) if not dry_run else {}
 
-    # Ensure registry client exists
-    registry_client = get_or_create_registry_client(registry_url) if not dry_run else None
+    # Ensure registry client exists — NiFi itself connects via the internal VPC URL,
+    # not the SSM tunnel URL used by this script.
+    registry_internal_url = config.get("nifi_registry_internal_url", registry_url)
+    registry_client = get_or_create_registry_client(registry_url, registry_internal_url) if not dry_run else None
 
     # Ensure bucket exists in registry
     bucket_name = flows_to_deploy[0]["registry_bucket"] if flows_to_deploy else "openflow-flows"
@@ -294,7 +398,7 @@ def main(env: str, flow: Optional[str], dry_run: bool, skip_secrets: bool, targe
             process_group_name=pg_name,
             registry_client_id=registry_client.id,
             bucket_id=bucket.identifier,
-            flow_id=snapshot.snapshot_metadata.bucket_identifier,
+            flow_id=snapshot.snapshot_metadata.flow_identifier,
             version=version_to_deploy,
             context_id=context_id,
             dry_run=dry_run,

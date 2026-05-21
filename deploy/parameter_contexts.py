@@ -70,7 +70,8 @@ def upsert_parameter_context(context_name: str, params: dict) -> Any:
 
 def _find_parameter_context(name: str) -> Any | None:
     try:
-        contexts = nipyapi.nifi.ParameterContextsApi().get_parameter_contexts()
+        # NiFi 2.0: parameter contexts are listed via FlowApi, not ParameterContextsApi
+        contexts = nipyapi.nifi.FlowApi().get_parameter_contexts()
         if contexts and contexts.parameter_contexts:
             for ctx in contexts.parameter_contexts:
                 if ctx.component.name == name:
