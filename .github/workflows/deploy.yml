@@ -25,11 +25,21 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r deploy/requirements.txt
 
+      - name: Debug OIDC availability
+        run: |
+          echo "ID token URL set: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL != '' }}"
+          if [ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]; then
+            echo "ERROR: OIDC token URL not available - id-token:write permission may not be active"
+          else
+            echo "OIDC token URL is available"
+          fi
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::866586366759:role/openflow-github-actions
           aws-region: eu-west-2
+          audience: sts.amazonaws.com
 
       - name: Install SSM session manager plugin
         run: |
