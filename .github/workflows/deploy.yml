@@ -1,0 +1,76 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-dev:
+    name: Deploy to dev
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: pip install -r deploy/requirements.txt
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::866586366759:role/openflow-github-actions
+          aws-region: eu-west-2
+
+      - name: Install SSM session manager plugin
+        run: |
+          curl -fsSL \
+            "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" \
+            -o /tmp/smp.deb
+          sudo dpkg -i /tmp/smp.deb
+
+      - name: Start SSM tunnels
+        run: |
+          aws ssm start-session \
+            --target i-0aaf347379a7f6939 \
+            --document-name AWS-StartPortForwardingSession \
+            --parameters portNumber=8443,localPortNumber=8443 \
+            --region eu-west-2 &
+          echo $! > /tmp/nifi-tunnel.pid
+
+          aws ssm start-session \
+            --target i-0b34d96c1a2278245 \
+            --document-name AWS-StartPortForwardingSession \
+            --parameters portNumber=18080,localPortNumber=18080 \
+            --region eu-west-2 &
+          echo $! > /tmp/registry-tunnel.pid
+
+          echo "Waiting for NiFi tunnel..."
+          timeout 90 bash -c \
+            'until curl -sk https://localhost:8443/nifi-api/system-diagnostics -o /dev/null; do sleep 3; done'
+
+          echo "Waiting for Registry tunnel..."
+          timeout 60 bash -c \
+            'until curl -s http://localhost:18080/nifi-registry-api/buckets -o /dev/null; do sleep 3; done'
+
+      - name: Deploy flows
+        env:
+          NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_ADMIN_PASSWORD }}
+        run: python deploy/deploy.py --env dev
+
+      - name: Stop SSM tunnels
+        if: always()
+        run: |
+          kill "$(cat /tmp/nifi-tunnel.pid)"    2>/dev/null || true
+          kill "$(cat /tmp/registry-tunnel.pid)" 2>/dev/null || true
