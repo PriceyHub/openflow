@@ -53,7 +53,7 @@ def schedule_pg(nifi_session, pg_id: str, running: bool) -> None:
         nipyapi.canvas.schedule_process_group(pg_id, False)
         return
     # When starting, retry if processors are still in STARTING/STOPPING transition
-    deadline = time.time() + 60
+    deadline = time.time() + 120
     while True:
         try:
             nipyapi.canvas.schedule_process_group(pg_id, True)

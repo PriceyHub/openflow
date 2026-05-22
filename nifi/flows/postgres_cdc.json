@@ -312,10 +312,7 @@
           "version": "2.0.0"
         },
         "properties": {
-          "schema-access-strategy": "infer-schema",
-          "date-format": "yyyy-MM-dd",
-          "time-format": "HH:mm:ss",
-          "timestamp-format": "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+          "schema-access-strategy": "infer-schema"
         },
         "propertyDescriptors": {},
         "scheduledState": "ENABLED",
@@ -332,7 +329,6 @@
           "version": "2.0.0"
         },
         "properties": {
-          "schema-write-strategy": "no-schema",
           "output-grouping": "output-array",
           "compression-format": "none"
         },
@@ -377,7 +373,7 @@
         "properties": {
           "Database Connection URL": "jdbc:snowflake://#{snowflake_account}.snowflakecomputing.com/?db=#{snowflake_database}&schema=RAW&warehouse=#{snowflake_warehouse}",
           "Database Driver Class Name": "net.snowflake.client.jdbc.SnowflakeDriver",
-          "database-driver-locations": "/opt/nifi/nifi-current/lib/custom/snowflake-jdbc.jar",
+          "database-driver-locations": "https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.22.1/snowflake-jdbc-3.22.1.jar",
           "Database User": "#{snowflake_username}",
           "Password": "#{snowflake_password}",
           "Max Wait Time": "500 millis",

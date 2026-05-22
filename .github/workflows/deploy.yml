@@ -83,7 +83,7 @@ jobs:
             -H "Content-Type: application/x-www-form-urlencoded") \
             || { echo "Cannot reach NiFi — skipping diagnostics"; exit 0; }
           echo "=== Process groups ==="
-          curl -sk -H "Authorization: Bearer $TOKEN" "https://localhost:8443/nifi-api/process-groups/root/process-groups" | jq -r '.processGroups[] | "\(.component.name): \(.component.state) running=\(.status.aggregateSnapshot.runningCount) stopped=\(.status.aggregateSnapshot.stoppedCount) invalid=\(.status.aggregateSnapshot.invalidCount)"'
+          curl -sk -H "Authorization: Bearer $TOKEN" "https://localhost:8443/nifi-api/process-groups/root/process-groups" | jq -r '[.processGroups[] | {name:.component.name,run:(.status.aggregateSnapshot.runningCount//0),stop:(.status.aggregateSnapshot.stoppedCount//0),inv:(.status.aggregateSnapshot.invalidCount//0)}] | unique_by(.name) | .[] | "\(.name): running=\(.run) stopped=\(.stop) invalid=\(.inv)"'
           echo "=== Root controller services ==="
           curl -sk -H "Authorization: Bearer $TOKEN" "https://localhost:8443/nifi-api/flow/controller/controller-services" | jq -r '.controllerServices[] | "\(.component.name): \(.component.state)"'
           echo "=== Bulletins ==="
