@@ -271,8 +271,8 @@ def _enable_controller_services(pg_id: str) -> None:
             except Exception as exc:
                 logger.warning("Could not enable controller service %s: %s", svc.component.name, exc)
 
-        # Poll until all are enabled (up to 60s)
-        deadline = time.time() + 60
+        # Poll until all are enabled (up to 300s — Maven jar download on cold start)
+        deadline = time.time() + 300
         while time.time() < deadline:
             states = {
                 s.component.name: s.component.state
