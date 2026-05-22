@@ -157,6 +157,17 @@ def deploy_flow_to_nifi(
                 logger.warning("Could not delete unversioned PG: %s", del_exc)
             existing = None
 
+    # Purge any lingering same-name PGs (e.g. if a previous delete failed)
+    remaining = nipyapi.canvas.list_all_process_groups(pg_id=root_pg_id)
+    for dup in [pg for pg in remaining if pg.component.name == process_group_name]:
+        try:
+            _stop_process_group(dup.id)
+            time.sleep(2)
+            nipyapi.canvas.delete_process_group(dup, force=True)
+            logger.info("Purged lingering PG before recreate: %s (%s)", dup.component.name, dup.id)
+        except Exception as exc:
+            logger.warning("Could not purge lingering PG %s: %s", dup.id, exc)
+
     # Create new process group from registry.
     # Use the NiFi REST API directly — nipyapi.versioning.deploy_flow_version
     # internally calls list_flow_versions which proxies through NiFi's registry

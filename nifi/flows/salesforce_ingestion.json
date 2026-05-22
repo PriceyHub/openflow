@@ -357,10 +357,7 @@
           "version": "2.0.0"
         },
         "properties": {
-          "schema-access-strategy": "infer-schema",
-          "date-format": "yyyy-MM-dd",
-          "time-format": "HH:mm:ss",
-          "timestamp-format": "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+          "schema-access-strategy": "infer-schema"
         },
         "propertyDescriptors": {},
         "scheduledState": "ENABLED",
@@ -377,7 +374,6 @@
           "version": "2.0.0"
         },
         "properties": {
-          "schema-write-strategy": "no-schema",
           "output-grouping": "output-array",
           "compression-format": "none"
         },
@@ -398,7 +394,7 @@
         "properties": {
           "Database Connection URL": "jdbc:snowflake://#{snowflake_account}.snowflakecomputing.com/?db=#{snowflake_database}&schema=#{snowflake_schema}&warehouse=#{snowflake_warehouse}",
           "Database Driver Class Name": "net.snowflake.client.jdbc.SnowflakeDriver",
-          "database-driver-locations": "/opt/nifi/nifi-current/lib/custom/snowflake-jdbc.jar",
+          "database-driver-locations": "https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.22.1/snowflake-jdbc-3.22.1.jar",
           "Database User": "#{snowflake_username}",
           "Password": "#{snowflake_password}",
           "Max Wait Time": "500 millis",
@@ -428,13 +424,11 @@
         },
         "properties": {
           "salesforce-instance-url": "#{salesforce_instance_url}",
-          "salesforce-version": "#{salesforce_api_version}",
           "salesforce-client-id": "#{salesforce_client_id}",
           "salesforce-client-secret": "#{salesforce_client_secret}",
-          "salesforce-object-type": "Account",
-          "salesforce-soql-query": "SELECT Id,Name,Industry,AnnualRevenue,BillingCity,BillingCountry,Phone,Website,NumberOfEmployees,OwnerId,CreatedDate,LastModifiedDate,IsDeleted FROM Account ORDER BY LastModifiedDate ASC",
+          "sObject Name": "Account",
           "salesforce-include-deleted": "false",
-          "salesforce-output-format": "JSON"
+          "Record Writer": "0002b2c3-d4e5-0002-0013-000000000013"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -549,9 +543,9 @@
           "record-reader": "0002b2c3-d4e5-0002-0012-000000000012",
           "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
           "merge-strategy": "Bin-Packing Algorithm",
-          "Min Records": "1000",
-          "Max Records": "50000",
-          "Max Bin Count": "5"
+          "minimum-number-of-records": "1000",
+          "maximum-number-of-records": "50000",
+          "max-bin-count": "5"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -672,13 +666,11 @@
         },
         "properties": {
           "salesforce-instance-url": "#{salesforce_instance_url}",
-          "salesforce-version": "#{salesforce_api_version}",
           "salesforce-client-id": "#{salesforce_client_id}",
           "salesforce-client-secret": "#{salesforce_client_secret}",
-          "salesforce-object-type": "Contact",
-          "salesforce-soql-query": "SELECT Id,AccountId,FirstName,LastName,Email,Phone,Title,Department,LeadSource,OwnerId,CreatedDate,LastModifiedDate,IsDeleted FROM Contact ORDER BY LastModifiedDate ASC",
+          "sObject Name": "Contact",
           "salesforce-include-deleted": "false",
-          "salesforce-output-format": "JSON"
+          "Record Writer": "0002b2c3-d4e5-0002-0013-000000000013"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -793,9 +785,9 @@
           "record-reader": "0002b2c3-d4e5-0002-0012-000000000012",
           "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
           "merge-strategy": "Bin-Packing Algorithm",
-          "Min Records": "1000",
-          "Max Records": "50000",
-          "Max Bin Count": "5"
+          "minimum-number-of-records": "1000",
+          "maximum-number-of-records": "50000",
+          "max-bin-count": "5"
         },
         "propertyDescriptors": {},
         "style": {},
