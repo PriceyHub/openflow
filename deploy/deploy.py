@@ -200,13 +200,22 @@ def _stop_process_group(pg_id: str) -> None:
 def _enable_controller_services(pg_id: str) -> None:
     """Enable all controller services in a process group before starting processors."""
     try:
-        services = nipyapi.nifi.FlowApi().get_controller_services_from_group(pg_id).controller_services or []
+        cs_api = nipyapi.nifi.ControllerServicesApi()
+        flow_api = nipyapi.nifi.FlowApi()
+        services = flow_api.get_controller_services_from_group(pg_id).controller_services or []
         disabled = [s for s in services if s.component.state != "ENABLED"]
         if not disabled:
             return
         for svc in disabled:
             try:
-                nipyapi.canvas.set_service_enabled(svc, True)
+                cs_api.update_controller_service_run_status(
+                    id=svc.id,
+                    body=nipyapi.nifi.ControllerServiceRunStatusEntity(
+                        revision=svc.revision,
+                        state="ENABLED",
+                        disconnected_node_acknowledged=False,
+                    ),
+                )
             except Exception as exc:
                 logger.warning("Could not enable controller service %s: %s", svc.component.name, exc)
         # Poll until all are enabled (up to 30s)
@@ -214,7 +223,7 @@ def _enable_controller_services(pg_id: str) -> None:
         while time.time() < deadline:
             states = {
                 s.component.name: s.component.state
-                for s in (nipyapi.nifi.FlowApi().get_controller_services_from_group(pg_id).controller_services or [])
+                for s in (flow_api.get_controller_services_from_group(pg_id).controller_services or [])
             }
             if all(v == "ENABLED" for v in states.values()):
                 break
