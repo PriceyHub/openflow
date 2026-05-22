@@ -33,10 +33,15 @@ def _require_env(name: str) -> str:
 
 @pytest.fixture(scope="session")
 def snowflake_conn():
+    from cryptography.hazmat.primitives.serialization import load_pem_private_key
+
+    private_key_pem = _require_env("SNOWFLAKE_PRIVATE_KEY").encode()
+    private_key = load_pem_private_key(private_key_pem, password=None)
+
     conn = snowflake.connector.connect(
         account=_require_env("SNOWFLAKE_ACCOUNT"),
         user=_require_env("SNOWFLAKE_USER"),
-        password=_require_env("SNOWFLAKE_PASSWORD"),
+        private_key=private_key,
         database=_require_env("SNOWFLAKE_DATABASE"),
         warehouse=_require_env("SNOWFLAKE_WAREHOUSE"),
         schema=_require_env("SNOWFLAKE_SCHEMA"),

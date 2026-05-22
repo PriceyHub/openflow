@@ -73,8 +73,7 @@ jobs:
           echo "PG_DATABASE=$(echo $PG  | python3 -c "import json,sys; print(json.load(sys.stdin)['database'])")" >> $GITHUB_ENV
           echo "PG_USER=$(echo $PG      | python3 -c "import json,sys; print(json.load(sys.stdin)['username'])")" >> $GITHUB_ENV
           echo "PG_PASSWORD=$(echo $PG  | python3 -c "import json,sys; print(json.load(sys.stdin)['password'])")" >> $GITHUB_ENV
-          echo "SNOWFLAKE_USER=$(echo $SF     | python3 -c "import json,sys; print(json.load(sys.stdin)['username'])")" >> $GITHUB_ENV
-          echo "SNOWFLAKE_PASSWORD=$(echo $SF | python3 -c "import json,sys; print(json.load(sys.stdin)['password'])")" >> $GITHUB_ENV
+          echo "SNOWFLAKE_USER=OPENFLOW_NIFI_SVC"            >> $GITHUB_ENV
           echo "SNOWFLAKE_ACCOUNT=cngfczx-ow26289"          >> $GITHUB_ENV
           echo "SNOWFLAKE_DATABASE=OPENFLOW_DEV"             >> $GITHUB_ENV
           echo "SNOWFLAKE_WAREHOUSE=OPENFLOW_INGEST_WH_DEV"  >> $GITHUB_ENV
@@ -86,6 +85,7 @@ jobs:
       - name: Run integration tests
         env:
           NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_ADMIN_PASSWORD }}
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
           PG_PORT: "5432"
         run: |
           pip install pytest pytest-timeout psycopg2-binary snowflake-connector-python
