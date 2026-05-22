@@ -14,17 +14,19 @@ mkdir -p /data/nifi
 mount /dev/xvdf /data/nifi
 echo "/dev/xvdf /data/nifi xfs defaults,nofail 0 2" >> /etc/fstab
 
-mkdir -p /data/nifi/{logs,database_repository,flowfile_repository,content_repository,provenance_repository,state}
+mkdir -p /data/nifi/{logs,database_repository,flowfile_repository,content_repository,provenance_repository,state,lib_custom}
 
 # Install Docker
 dnf install -y docker
 systemctl start docker
 systemctl enable docker
 
-# Download Snowflake JDBC (mounted into container)
-mkdir -p /data/nifi/drivers
-curl -fsSL -o /data/nifi/drivers/snowflake-jdbc.jar \
-  "https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.14.4/snowflake-jdbc-3.14.4.jar"
+# Download JDBC drivers (mounted into container)
+mkdir -p /data/nifi/lib_custom
+curl -fsSL -o /data/nifi/lib_custom/snowflake-jdbc.jar \
+  "https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.22.1/snowflake-jdbc-3.22.1.jar"
+curl -fsSL -o /data/nifi/lib_custom/postgresql.jar \
+  "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar"
 
 # Fetch NiFi admin password from Secrets Manager
 NIFI_PASSWORD=$(aws secretsmanager get-secret-value \
@@ -42,7 +44,7 @@ docker run -d --name nifi \
   -v /data/nifi/content_repository:/opt/nifi/nifi-current/content_repository \
   -v /data/nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository \
   -v /data/nifi/state:/opt/nifi/nifi-current/state \
-  -v /data/nifi/drivers:/opt/nifi/nifi-current/lib/custom \
+  -v /data/nifi/lib_custom:/opt/nifi/nifi-current/lib/custom \
   -e NIFI_WEB_HTTPS_HOST=0.0.0.0 \
   -e SINGLE_USER_CREDENTIALS_USERNAME=admin \
   -e SINGLE_USER_CREDENTIALS_PASSWORD="$NIFI_PASSWORD" \
