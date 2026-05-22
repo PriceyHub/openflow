@@ -15,4 +15,6 @@ rds_security_group_id = "sg-0c028ba9d46d9feac"
 
 allowed_cidr_blocks = ["10.0.0.0/8"]
 
-snowflake_account = "cngfczx-ow26289"
+snowflake_account      = "cngfczx-ow26289"
+snowflake_iam_user_arn = "arn:aws:iam::281525601122:user/8utp1000-s"
+snowflake_external_id  = "ZM16110_SFCRole=6_zFuoyG9C5dlSTIWcX7qNyXvkxWc="

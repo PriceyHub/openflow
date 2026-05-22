@@ -107,3 +107,58 @@ resource "aws_iam_instance_profile" "nifi" {
   name = "openflow-nifi-${var.environment}"
   role = aws_iam_role.nifi.name
 }
+
+# ============================================================
+# Snowflake → S3 storage integration role
+# ============================================================
+
+data "aws_iam_policy_document" "snowflake_s3_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "AWS"
+      identifiers = [var.snowflake_iam_user_arn]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values   = [var.snowflake_external_id]
+    }
+  }
+}
+
+resource "aws_iam_role" "snowflake_s3" {
+  name               = "openflow-snowflake-s3-${var.environment}"
+  assume_role_policy = data.aws_iam_policy_document.snowflake_s3_assume_role.json
+
+  tags = merge(var.tags, {
+    Project     = "openflow"
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  })
+}
+
+data "aws_iam_policy_document" "snowflake_s3_access" {
+  statement {
+    sid    = "StagingBucketAccess"
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:DeleteObject",
+      "s3:ListBucket",
+      "s3:GetBucketLocation"
+    ]
+    resources = [
+      aws_s3_bucket.staging.arn,
+      "${aws_s3_bucket.staging.arn}/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "snowflake_s3" {
+  name   = "snowflake-s3-staging-access"
+  role   = aws_iam_role.snowflake_s3.name
+  policy = data.aws_iam_policy_document.snowflake_s3_access.json
+}
