@@ -1,27 +1,82 @@
 {
-  "encodingVersion": { "majorVersion": 2, "minorVersion": 0 },
+  "encodingVersion": {
+    "majorVersion": 2,
+    "minorVersion": 0
+  },
   "externalControllerServices": {},
   "parameterContexts": {
     "salesforce-ingestion-params": {
       "componentType": "PARAMETER_CONTEXT",
-      "description": "Salesforce ingestion parameters — values injected per environment",
+      "description": "Salesforce ingestion parameters \u00e2\u20ac\u201d values injected per environment",
       "identifier": "a1b2c3d4-0001-0001-0001-000000000001",
       "name": "salesforce-ingestion-params",
       "parameterProviders": {},
       "parameters": [
-        { "name": "salesforce_instance_url",    "sensitive": false, "value": "" },
-        { "name": "salesforce_client_id",       "sensitive": true,  "value": "" },
-        { "name": "salesforce_client_secret",   "sensitive": true,  "value": "" },
-        { "name": "salesforce_api_version",     "sensitive": false, "value": "59.0" },
-        { "name": "snowflake_account",          "sensitive": false, "value": "" },
-        { "name": "snowflake_database",         "sensitive": false, "value": "" },
-        { "name": "snowflake_schema",           "sensitive": false, "value": "RAW" },
-        { "name": "snowflake_warehouse",        "sensitive": false, "value": "" },
-        { "name": "snowflake_username",         "sensitive": false, "value": "" },
-        { "name": "snowflake_password",         "sensitive": true,  "value": "" },
-        { "name": "s3_staging_bucket",          "sensitive": false, "value": "" },
-        { "name": "s3_region",                  "sensitive": false, "value": "eu-west-2" },
-        { "name": "batch_id_attribute",         "sensitive": false, "value": "${now():toNumber()}" }
+        {
+          "name": "salesforce_instance_url",
+          "sensitive": false,
+          "value": ""
+        },
+        {
+          "name": "salesforce_client_id",
+          "sensitive": true,
+          "value": ""
+        },
+        {
+          "name": "salesforce_client_secret",
+          "sensitive": true,
+          "value": ""
+        },
+        {
+          "name": "salesforce_api_version",
+          "sensitive": false,
+          "value": "59.0"
+        },
+        {
+          "name": "snowflake_account",
+          "sensitive": false,
+          "value": ""
+        },
+        {
+          "name": "snowflake_database",
+          "sensitive": false,
+          "value": ""
+        },
+        {
+          "name": "snowflake_schema",
+          "sensitive": false,
+          "value": "RAW"
+        },
+        {
+          "name": "snowflake_warehouse",
+          "sensitive": false,
+          "value": ""
+        },
+        {
+          "name": "snowflake_username",
+          "sensitive": false,
+          "value": ""
+        },
+        {
+          "name": "snowflake_password",
+          "sensitive": true,
+          "value": ""
+        },
+        {
+          "name": "s3_staging_bucket",
+          "sensitive": false,
+          "value": ""
+        },
+        {
+          "name": "s3_region",
+          "sensitive": false,
+          "value": "eu-west-2"
+        },
+        {
+          "name": "batch_id_attribute",
+          "sensitive": false,
+          "value": "${now():toNumber()}"
+        }
       ]
     }
   },
@@ -31,7 +86,10 @@
     "instanceIdentifier": "a1b2c3d4-0001-0001-0001-000000000010",
     "name": "Salesforce Ingestion",
     "comments": "Ingests Account and Contact objects from Salesforce REST API into Snowflake via S3 staging",
-    "position": { "x": 0.0, "y": 0.0 },
+    "position": {
+      "x": 0.0,
+      "y": 0.0
+    },
     "parameterContextName": "salesforce-ingestion-params",
     "flowFileConcurrency": "UNBOUNDED",
     "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
@@ -45,53 +103,47 @@
     "connections": [
       {
         "componentType": "CONNECTION",
-        "identifier": "conn-sf-001",
+        "identifier": "0002b2c3-d4e5-0002-0001-000000000001",
         "name": "",
-        "source": { "id": "proc-sf-query-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-split-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["success"],
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0020-000000000020",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0024-000000000024",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "success"
+        ],
         "backPressureObjectThreshold": 10000,
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
-        "prioritizers": ["org.apache.nifi.prioritizer.FirstInFirstOutPrioritizer"],
+        "prioritizers": [
+          "org.apache.nifi.prioritizer.FirstInFirstOutPrioritizer"
+        ],
         "bends": [],
         "labelIndex": 1,
         "zIndex": 0
       },
       {
         "componentType": "CONNECTION",
-        "identifier": "conn-sf-002",
-        "source": { "id": "proc-sf-split-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-convert-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["split"],
-        "backPressureObjectThreshold": 10000,
-        "backPressureDataSizeThreshold": "1 GB",
-        "flowFileExpiration": "0 sec",
-        "prioritizers": [],
-        "bends": [],
-        "labelIndex": 1,
-        "zIndex": 0
-      },
-      {
-        "componentType": "CONNECTION",
-        "identifier": "conn-sf-003",
-        "source": { "id": "proc-sf-convert-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-merge-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["success"],
-        "backPressureObjectThreshold": 10000,
-        "backPressureDataSizeThreshold": "1 GB",
-        "flowFileExpiration": "0 sec",
-        "prioritizers": [],
-        "bends": [],
-        "labelIndex": 1,
-        "zIndex": 0
-      },
-      {
-        "componentType": "CONNECTION",
-        "identifier": "conn-sf-004",
-        "source": { "id": "proc-sf-merge-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-s3-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["merged"],
+        "identifier": "0002b2c3-d4e5-0002-0002-000000000002",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0024-000000000024",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0014-000000000014",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "split"
+        ],
         "backPressureObjectThreshold": 10000,
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
@@ -102,10 +154,20 @@
       },
       {
         "componentType": "CONNECTION",
-        "identifier": "conn-sf-005",
-        "source": { "id": "proc-sf-s3-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-copy-accounts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["success"],
+        "identifier": "0002b2c3-d4e5-0002-0003-000000000003",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0014-000000000014",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0018-000000000018",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "success"
+        ],
         "backPressureObjectThreshold": 10000,
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
@@ -116,10 +178,20 @@
       },
       {
         "componentType": "CONNECTION",
-        "identifier": "conn-sf-006",
-        "source": { "id": "proc-sf-query-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-split-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["success"],
+        "identifier": "0002b2c3-d4e5-0002-0004-000000000004",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0018-000000000018",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0022-000000000022",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "merged"
+        ],
         "backPressureObjectThreshold": 10000,
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
@@ -130,10 +202,20 @@
       },
       {
         "componentType": "CONNECTION",
-        "identifier": "conn-sf-007",
-        "source": { "id": "proc-sf-split-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-convert-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["split"],
+        "identifier": "0002b2c3-d4e5-0002-0005-000000000005",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0022-000000000022",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0016-000000000016",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "success"
+        ],
         "backPressureObjectThreshold": 10000,
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
@@ -144,10 +226,20 @@
       },
       {
         "componentType": "CONNECTION",
-        "identifier": "conn-sf-008",
-        "source": { "id": "proc-sf-convert-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-merge-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["success"],
+        "identifier": "0002b2c3-d4e5-0002-0006-000000000006",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0021-000000000021",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0025-000000000025",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "success"
+        ],
         "backPressureObjectThreshold": 10000,
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
@@ -158,10 +250,20 @@
       },
       {
         "componentType": "CONNECTION",
-        "identifier": "conn-sf-009",
-        "source": { "id": "proc-sf-merge-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-s3-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["merged"],
+        "identifier": "0002b2c3-d4e5-0002-0007-000000000007",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0025-000000000025",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0015-000000000015",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "split"
+        ],
         "backPressureObjectThreshold": 10000,
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
@@ -172,10 +274,68 @@
       },
       {
         "componentType": "CONNECTION",
-        "identifier": "conn-sf-010",
-        "source": { "id": "proc-sf-s3-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "destination": { "id": "proc-sf-copy-contacts", "type": "PROCESSOR", "groupId": "a1b2c3d4-0001-0001-0001-000000000010" },
-        "selectedRelationships": ["success"],
+        "identifier": "0002b2c3-d4e5-0002-0008-000000000008",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0015-000000000015",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0019-000000000019",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "success"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "labelIndex": 1,
+        "zIndex": 0
+      },
+      {
+        "componentType": "CONNECTION",
+        "identifier": "0002b2c3-d4e5-0002-0009-000000000009",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0019-000000000019",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0023-000000000023",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "merged"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "labelIndex": 1,
+        "zIndex": 0
+      },
+      {
+        "componentType": "CONNECTION",
+        "identifier": "0002b2c3-d4e5-0002-0010-000000000010",
+        "source": {
+          "id": "0002b2c3-d4e5-0002-0023-000000000023",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "destination": {
+          "id": "0002b2c3-d4e5-0002-0017-000000000017",
+          "type": "PROCESSOR",
+          "groupId": "a1b2c3d4-0001-0001-0001-000000000010"
+        },
+        "selectedRelationships": [
+          "success"
+        ],
         "backPressureObjectThreshold": 10000,
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
@@ -188,10 +348,14 @@
     "controllerServices": [
       {
         "componentType": "CONTROLLER_SERVICE",
-        "identifier": "cs-sf-json-reader",
+        "identifier": "0002b2c3-d4e5-0002-0012-000000000012",
         "name": "JsonTreeReader",
         "type": "org.apache.nifi.json.JsonTreeReader",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-record-serialization-services-nar", "version": "2.0.0" },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-record-serialization-services-nar",
+          "version": "2.0.0"
+        },
         "properties": {
           "schema-access-strategy": "infer-schema",
           "date-format": "yyyy-MM-dd",
@@ -204,10 +368,14 @@
       },
       {
         "componentType": "CONTROLLER_SERVICE",
-        "identifier": "cs-sf-json-writer",
+        "identifier": "0002b2c3-d4e5-0002-0013-000000000013",
         "name": "JsonRecordSetWriter",
         "type": "org.apache.nifi.json.JsonRecordSetWriter",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-record-serialization-services-nar", "version": "2.0.0" },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-record-serialization-services-nar",
+          "version": "2.0.0"
+        },
         "properties": {
           "schema-write-strategy": "no-schema",
           "output-grouping": "output-array",
@@ -219,10 +387,14 @@
       },
       {
         "componentType": "CONTROLLER_SERVICE",
-        "identifier": "cs-sf-dbcp-snowflake",
+        "identifier": "0002b2c3-d4e5-0002-0011-000000000011",
         "name": "SnowflakeDBCPConnectionPool",
         "type": "org.apache.nifi.dbcp.DBCPConnectionPool",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-dbcp-service-nar", "version": "2.0.0" },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-dbcp-service-nar",
+          "version": "2.0.0"
+        },
         "properties": {
           "Database Connection URL": "jdbc:snowflake://#{snowflake_account}.snowflakecomputing.com/?db=#{snowflake_database}&schema=#{snowflake_schema}&warehouse=#{snowflake_warehouse}",
           "Database Driver Class Name": "net.snowflake.client.jdbc.SnowflakeDriver",
@@ -242,11 +414,18 @@
     "processors": [
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-query-accounts",
+        "identifier": "0002b2c3-d4e5-0002-0020-000000000020",
         "name": "QuerySalesforceObject - Account",
         "type": "org.apache.nifi.processors.salesforce.QuerySalesforceObject",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-salesforce-nar", "version": "2.0.0" },
-        "position": { "x": 100.0, "y": 100.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-salesforce-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 100.0,
+          "y": 100.0
+        },
         "properties": {
           "salesforce-instance-url": "#{salesforce_instance_url}",
           "salesforce-version": "#{salesforce_api_version}",
@@ -267,7 +446,10 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 1,
-        "autoTerminatedRelationships": ["No Results", "failure"],
+        "autoTerminatedRelationships": [
+          "No Results",
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 3,
@@ -276,11 +458,18 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-split-accounts",
+        "identifier": "0002b2c3-d4e5-0002-0024-000000000024",
         "name": "SplitJson - Account Records",
         "type": "org.apache.nifi.processors.standard.SplitJson",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-standard-nar", "version": "2.0.0" },
-        "position": { "x": 400.0, "y": 100.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 400.0,
+          "y": 100.0
+        },
         "properties": {
           "JsonPath Expression": "$.records",
           "Null Value Representation": "empty string"
@@ -295,7 +484,10 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 4,
-        "autoTerminatedRelationships": ["original", "failure"],
+        "autoTerminatedRelationships": [
+          "original",
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 0,
@@ -304,14 +496,21 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-convert-accounts",
-        "name": "ConvertRecord - Account JSON→JSON (normalise)",
+        "identifier": "0002b2c3-d4e5-0002-0014-000000000014",
+        "name": "ConvertRecord - Account JSON\u00e2\u2020\u2019JSON (normalise)",
         "type": "org.apache.nifi.processors.standard.ConvertRecord",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-standard-nar", "version": "2.0.0" },
-        "position": { "x": 700.0, "y": 100.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 700.0,
+          "y": 100.0
+        },
         "properties": {
-          "record-reader": "cs-sf-json-reader",
-          "record-writer": "cs-sf-json-writer"
+          "record-reader": "0002b2c3-d4e5-0002-0012-000000000012",
+          "record-writer": "0002b2c3-d4e5-0002-0013-000000000013"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -323,7 +522,9 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 4,
-        "autoTerminatedRelationships": ["failure"],
+        "autoTerminatedRelationships": [
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 0,
@@ -332,19 +533,25 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-merge-accounts",
+        "identifier": "0002b2c3-d4e5-0002-0018-000000000018",
         "name": "MergeRecord - Account Batch",
         "type": "org.apache.nifi.processors.standard.MergeRecord",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-standard-nar", "version": "2.0.0" },
-        "position": { "x": 1000.0, "y": 100.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 1000.0,
+          "y": 100.0
+        },
         "properties": {
-          "record-reader": "cs-sf-json-reader",
-          "record-writer": "cs-sf-json-writer",
+          "record-reader": "0002b2c3-d4e5-0002-0012-000000000012",
+          "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
           "merge-strategy": "Bin-Packing Algorithm",
-          "Minimum Number of Records": "1000",
-          "Maximum Number of Records": "50000",
-          "Max Bin Age": "5 min",
-          "Maximum Number of Bins": "5"
+          "Min Records": "1000",
+          "Max Records": "50000",
+          "Max Bin Count": "5"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -356,7 +563,10 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 1,
-        "autoTerminatedRelationships": ["original", "failure"],
+        "autoTerminatedRelationships": [
+          "original",
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 0,
@@ -365,18 +575,25 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-s3-accounts",
+        "identifier": "0002b2c3-d4e5-0002-0022-000000000022",
         "name": "PutS3Object - Account Stage",
         "type": "org.apache.nifi.processors.aws.s3.PutS3Object",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-aws-nar", "version": "2.0.0" },
-        "position": { "x": 1300.0, "y": 100.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-aws-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 1300.0,
+          "y": 100.0
+        },
         "properties": {
           "Bucket": "#{s3_staging_bucket}",
           "Object Key": "staged/salesforce/accounts/${now():format('yyyy/MM/dd')}/${uuid()}.json",
           "Region": "#{s3_region}",
           "Use Path Style Access": "false",
           "Server Side Encryption": "AES256",
-          "Storage Class": "STANDARD"
+          "Storage Class": "Standard"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -388,7 +605,9 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 4,
-        "autoTerminatedRelationships": ["failure"],
+        "autoTerminatedRelationships": [
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 3,
@@ -397,13 +616,20 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-copy-accounts",
+        "identifier": "0002b2c3-d4e5-0002-0016-000000000016",
         "name": "ExecuteSQL - COPY INTO SF_ACCOUNTS_RAW",
         "type": "org.apache.nifi.processors.standard.ExecuteSQL",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-standard-nar", "version": "2.0.0" },
-        "position": { "x": 1600.0, "y": 100.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 1600.0,
+          "y": 100.0
+        },
         "properties": {
-          "Database Connection Pooling Service": "cs-sf-dbcp-snowflake",
+          "Database Connection Pooling Service": "0002b2c3-d4e5-0002-0011-000000000011",
           "SQL select query": "COPY INTO #{snowflake_database}.RAW.SF_ACCOUNTS_RAW (_raw_json, _source_file, _batch_id) FROM (SELECT $1, METADATA$FILENAME, '${s3.key}' FROM @#{snowflake_database}.RAW.OPENFLOW_S3_STAGE/staged/salesforce/accounts/) FILE_FORMAT=(TYPE=JSON STRIP_OUTER_ARRAY=TRUE) ON_ERROR='CONTINUE' PURGE=FALSE",
           "Max Wait Time": "0 millis",
           "Output Batch Size": "0",
@@ -420,7 +646,10 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 1,
-        "autoTerminatedRelationships": ["success", "failure"],
+        "autoTerminatedRelationships": [
+          "success",
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 3,
@@ -429,11 +658,18 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-query-contacts",
+        "identifier": "0002b2c3-d4e5-0002-0021-000000000021",
         "name": "QuerySalesforceObject - Contact",
         "type": "org.apache.nifi.processors.salesforce.QuerySalesforceObject",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-salesforce-nar", "version": "2.0.0" },
-        "position": { "x": 100.0, "y": 400.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-salesforce-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 100.0,
+          "y": 400.0
+        },
         "properties": {
           "salesforce-instance-url": "#{salesforce_instance_url}",
           "salesforce-version": "#{salesforce_api_version}",
@@ -454,7 +690,10 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 1,
-        "autoTerminatedRelationships": ["No Results", "failure"],
+        "autoTerminatedRelationships": [
+          "No Results",
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 3,
@@ -463,11 +702,18 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-split-contacts",
+        "identifier": "0002b2c3-d4e5-0002-0025-000000000025",
         "name": "SplitJson - Contact Records",
         "type": "org.apache.nifi.processors.standard.SplitJson",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-standard-nar", "version": "2.0.0" },
-        "position": { "x": 400.0, "y": 400.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 400.0,
+          "y": 400.0
+        },
         "properties": {
           "JsonPath Expression": "$.records",
           "Null Value Representation": "empty string"
@@ -482,7 +728,10 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 4,
-        "autoTerminatedRelationships": ["original", "failure"],
+        "autoTerminatedRelationships": [
+          "original",
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 0,
@@ -491,14 +740,21 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-convert-contacts",
-        "name": "ConvertRecord - Contact JSON→JSON",
+        "identifier": "0002b2c3-d4e5-0002-0015-000000000015",
+        "name": "ConvertRecord - Contact JSON\u00e2\u2020\u2019JSON",
         "type": "org.apache.nifi.processors.standard.ConvertRecord",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-standard-nar", "version": "2.0.0" },
-        "position": { "x": 700.0, "y": 400.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 700.0,
+          "y": 400.0
+        },
         "properties": {
-          "record-reader": "cs-sf-json-reader",
-          "record-writer": "cs-sf-json-writer"
+          "record-reader": "0002b2c3-d4e5-0002-0012-000000000012",
+          "record-writer": "0002b2c3-d4e5-0002-0013-000000000013"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -510,7 +766,9 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 4,
-        "autoTerminatedRelationships": ["failure"],
+        "autoTerminatedRelationships": [
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 0,
@@ -519,19 +777,25 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-merge-contacts",
+        "identifier": "0002b2c3-d4e5-0002-0019-000000000019",
         "name": "MergeRecord - Contact Batch",
         "type": "org.apache.nifi.processors.standard.MergeRecord",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-standard-nar", "version": "2.0.0" },
-        "position": { "x": 1000.0, "y": 400.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 1000.0,
+          "y": 400.0
+        },
         "properties": {
-          "record-reader": "cs-sf-json-reader",
-          "record-writer": "cs-sf-json-writer",
+          "record-reader": "0002b2c3-d4e5-0002-0012-000000000012",
+          "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
           "merge-strategy": "Bin-Packing Algorithm",
-          "Minimum Number of Records": "1000",
-          "Maximum Number of Records": "50000",
-          "Max Bin Age": "5 min",
-          "Maximum Number of Bins": "5"
+          "Min Records": "1000",
+          "Max Records": "50000",
+          "Max Bin Count": "5"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -543,7 +807,10 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 1,
-        "autoTerminatedRelationships": ["original", "failure"],
+        "autoTerminatedRelationships": [
+          "original",
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 0,
@@ -552,18 +819,25 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-s3-contacts",
+        "identifier": "0002b2c3-d4e5-0002-0023-000000000023",
         "name": "PutS3Object - Contact Stage",
         "type": "org.apache.nifi.processors.aws.s3.PutS3Object",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-aws-nar", "version": "2.0.0" },
-        "position": { "x": 1300.0, "y": 400.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-aws-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 1300.0,
+          "y": 400.0
+        },
         "properties": {
           "Bucket": "#{s3_staging_bucket}",
           "Object Key": "staged/salesforce/contacts/${now():format('yyyy/MM/dd')}/${uuid()}.json",
           "Region": "#{s3_region}",
           "Use Path Style Access": "false",
           "Server Side Encryption": "AES256",
-          "Storage Class": "STANDARD"
+          "Storage Class": "Standard"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -575,7 +849,9 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 4,
-        "autoTerminatedRelationships": ["failure"],
+        "autoTerminatedRelationships": [
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 3,
@@ -584,13 +860,20 @@
       },
       {
         "componentType": "PROCESSOR",
-        "identifier": "proc-sf-copy-contacts",
+        "identifier": "0002b2c3-d4e5-0002-0017-000000000017",
         "name": "ExecuteSQL - COPY INTO SF_CONTACTS_RAW",
         "type": "org.apache.nifi.processors.standard.ExecuteSQL",
-        "bundle": { "group": "org.apache.nifi", "artifact": "nifi-standard-nar", "version": "2.0.0" },
-        "position": { "x": 1600.0, "y": 400.0 },
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.0.0"
+        },
+        "position": {
+          "x": 1600.0,
+          "y": 400.0
+        },
         "properties": {
-          "Database Connection Pooling Service": "cs-sf-dbcp-snowflake",
+          "Database Connection Pooling Service": "0002b2c3-d4e5-0002-0011-000000000011",
           "SQL select query": "COPY INTO #{snowflake_database}.RAW.SF_CONTACTS_RAW (_raw_json, _source_file, _batch_id) FROM (SELECT $1, METADATA$FILENAME, '${s3.key}' FROM @#{snowflake_database}.RAW.OPENFLOW_S3_STAGE/staged/salesforce/contacts/) FILE_FORMAT=(TYPE=JSON STRIP_OUTER_ARRAY=TRUE) ON_ERROR='CONTINUE' PURGE=FALSE",
           "Max Wait Time": "0 millis",
           "Output Batch Size": "0",
@@ -607,7 +890,10 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 1,
-        "autoTerminatedRelationships": ["success", "failure"],
+        "autoTerminatedRelationships": [
+          "success",
+          "failure"
+        ],
         "retriedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 3,

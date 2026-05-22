@@ -89,8 +89,8 @@ def nifi_session():
     # Configure nipyapi so schedule_process_group calls work in recovery tests
     nipyapi.config.nifi_config.host = nifi_url.rstrip("/") + "/nifi-api"
     nipyapi.config.nifi_config.verify_ssl = False
-    nipyapi.config.nifi_config.api_key = {"Authorization": token}
-    nipyapi.config.nifi_config.api_key_prefix = {"Authorization": "Bearer"}
+    nipyapi.config.nifi_config.api_key = {"tokenAuth": token}
+    nipyapi.config.nifi_config.api_key_prefix = {"tokenAuth": "Bearer"}
 
     return session
 

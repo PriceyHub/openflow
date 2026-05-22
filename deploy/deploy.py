@@ -199,27 +199,39 @@ def _stop_process_group(pg_id: str) -> None:
 
 def _enable_controller_services(pg_id: str) -> None:
     """Enable all controller services in a process group before starting processors."""
+    import requests as _requests
+
     try:
-        cs_api = nipyapi.nifi.ControllerServicesApi()
         flow_api = nipyapi.nifi.FlowApi()
         services = flow_api.get_controller_services_from_group(pg_id).controller_services or []
         disabled = [s for s in services if s.component.state != "ENABLED"]
         if not disabled:
             return
+
+        nifi_base = nipyapi.config.nifi_config.host
+        token = (nipyapi.config.nifi_config.api_key or {}).get("tokenAuth", "")
+        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
         for svc in disabled:
             try:
-                cs_api.update_controller_service_run_status(
-                    id=svc.id,
-                    body=nipyapi.nifi.ControllerServiceRunStatusEntity(
-                        revision=svc.revision,
-                        state="ENABLED",
-                        disconnected_node_acknowledged=False,
-                    ),
+                body = {
+                    "revision": {"version": svc.revision.version},
+                    "state": "ENABLED",
+                    "disconnectedNodeAcknowledged": False,
+                }
+                resp = _requests.put(
+                    f"{nifi_base}/controller-services/{svc.id}/run-status",
+                    json=body,
+                    headers=headers,
+                    verify=False,
+                    timeout=15,
                 )
+                resp.raise_for_status()
             except Exception as exc:
                 logger.warning("Could not enable controller service %s: %s", svc.component.name, exc)
-        # Poll until all are enabled (up to 30s)
-        deadline = time.time() + 30
+
+        # Poll until all are enabled (up to 60s)
+        deadline = time.time() + 60
         while time.time() < deadline:
             states = {
                 s.component.name: s.component.state
@@ -227,7 +239,7 @@ def _enable_controller_services(pg_id: str) -> None:
             }
             if all(v == "ENABLED" for v in states.values()):
                 break
-            time.sleep(2)
+            time.sleep(3)
         logger.info("Controller services enabled for PG %s: %s", pg_id, list(states.keys()))
     except Exception as exc:
         logger.warning("Could not enable controller services for PG %s: %s", pg_id, exc)
