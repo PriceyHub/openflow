@@ -49,8 +49,21 @@ def get_pg_id_by_name(nifi_session, pg_name: str) -> str | None:
 
 def schedule_pg(nifi_session, pg_id: str, running: bool) -> None:
     import nipyapi
-    state = "RUNNING" if running else "STOPPED"
-    nipyapi.canvas.schedule_process_group(pg_id, running)
+    if not running:
+        nipyapi.canvas.schedule_process_group(pg_id, False)
+        return
+    # When starting, retry if processors are still in STARTING/STOPPING transition
+    deadline = time.time() + 60
+    while True:
+        try:
+            nipyapi.canvas.schedule_process_group(pg_id, True)
+            return
+        except ValueError as exc:
+            msg = str(exc)
+            if ("cannot be started" in msg or "not stopped" in msg) and time.time() < deadline:
+                time.sleep(5)
+            else:
+                raise
 
 
 # ---------------------------------------------------------------------------
