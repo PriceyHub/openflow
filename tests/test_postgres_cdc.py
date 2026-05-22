@@ -20,7 +20,8 @@ from conftest import wait_for_row_count
 
 
 SNOWFLAKE_DB = os.environ.get("SNOWFLAKE_DATABASE", "OPENFLOW_DEV")
-CDC_PROPAGATION_WAIT = int(os.environ.get("CDC_PROPAGATION_WAIT", "45"))
+# 60s poll interval + S3 upload + COPY INTO + MERGE = ~3 min end-to-end
+CDC_PROPAGATION_WAIT = int(os.environ.get("CDC_PROPAGATION_WAIT", "180"))
 
 
 # ---------------------------------------------------------------------------
