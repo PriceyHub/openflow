@@ -197,8 +197,36 @@ def _stop_process_group(pg_id: str) -> None:
         logger.warning("Could not stop PG %s: %s", pg_id, exc)
 
 
+def _enable_controller_services(pg_id: str) -> None:
+    """Enable all controller services in a process group before starting processors."""
+    try:
+        services = nipyapi.nifi.FlowApi().get_controller_services_from_group(pg_id).controller_services or []
+        disabled = [s for s in services if s.component.state != "ENABLED"]
+        if not disabled:
+            return
+        for svc in disabled:
+            try:
+                nipyapi.canvas.set_service_enabled(svc, True)
+            except Exception as exc:
+                logger.warning("Could not enable controller service %s: %s", svc.component.name, exc)
+        # Poll until all are enabled (up to 30s)
+        deadline = time.time() + 30
+        while time.time() < deadline:
+            states = {
+                s.component.name: s.component.state
+                for s in (nipyapi.nifi.FlowApi().get_controller_services_from_group(pg_id).controller_services or [])
+            }
+            if all(v == "ENABLED" for v in states.values()):
+                break
+            time.sleep(2)
+        logger.info("Controller services enabled for PG %s: %s", pg_id, list(states.keys()))
+    except Exception as exc:
+        logger.warning("Could not enable controller services for PG %s: %s", pg_id, exc)
+
+
 def _start_process_group(pg_id: str) -> None:
     try:
+        _enable_controller_services(pg_id)
         nipyapi.canvas.schedule_process_group(pg_id, scheduled=True)
         logger.info("Started process group %s", pg_id)
     except Exception as exc:
