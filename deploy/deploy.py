@@ -129,6 +129,9 @@ def deploy_flow_to_nifi(
 
     root_pg_id = get_root_pg_id()
 
+    # Remove any stale PGs from the old naming convention (e.g. "PostgreSQL CDC [dev]")
+    _delete_stale_process_groups(root_pg_id, process_group_name)
+
     # Check if process group already exists
     existing_pgs = nipyapi.canvas.list_all_process_groups(pg_id=root_pg_id)
     existing = next((pg for pg in existing_pgs if pg.component.name == process_group_name), None)
@@ -137,11 +140,22 @@ def deploy_flow_to_nifi(
         logger.info("Updating existing process group: %s", process_group_name)
         _stop_process_group(existing.id)
         time.sleep(3)
-        updated = nipyapi.versioning.update_flow_ver(process_group=existing, target_version=version)
-        _update_parameter_context(existing.id, context_id)
-        _start_process_group(existing.id)
-        logger.info("Updated and restarted: %s", process_group_name)
-        return updated
+        try:
+            updated = nipyapi.versioning.update_flow_ver(process_group=existing, target_version=version)
+            _update_parameter_context(existing.id, context_id)
+            _start_process_group(existing.id)
+            logger.info("Updated and restarted: %s", process_group_name)
+            return updated
+        except Exception as exc:
+            logger.warning(
+                "Could not version-update existing PG '%s' (%s) — deleting and recreating",
+                process_group_name, exc,
+            )
+            try:
+                nipyapi.canvas.delete_process_group(existing, force=True)
+            except Exception as del_exc:
+                logger.warning("Could not delete unversioned PG: %s", del_exc)
+            existing = None
 
     # Create new process group from registry.
     # Use the NiFi REST API directly — nipyapi.versioning.deploy_flow_version
@@ -187,6 +201,22 @@ def _update_parameter_context(pg_id: str, context_id: str) -> None:
         logger.info("Bound parameter context %s to PG %s", context_id, pg_id)
     except Exception as exc:
         logger.warning("Could not bind parameter context: %s", exc)
+
+
+def _delete_stale_process_groups(root_pg_id: str, canonical_name: str) -> None:
+    """Delete PGs whose name is the canonical name followed by an env suffix like ' [dev]'."""
+    import re
+    pattern = re.compile(r"^" + re.escape(canonical_name) + r"\s+\[.+\]$")
+    all_pgs = nipyapi.canvas.list_all_process_groups(pg_id=root_pg_id)
+    stale = [pg for pg in all_pgs if pattern.match(pg.component.name)]
+    for pg in stale:
+        try:
+            _stop_process_group(pg.id)
+            time.sleep(2)
+            nipyapi.canvas.delete_process_group(pg, force=True)
+            logger.info("Deleted stale process group: %s", pg.component.name)
+        except Exception as exc:
+            logger.warning("Could not delete stale PG %s: %s", pg.component.name, exc)
 
 
 def _stop_process_group(pg_id: str) -> None:

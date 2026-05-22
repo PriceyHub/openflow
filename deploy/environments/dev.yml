@@ -13,10 +13,10 @@ flows:
     flow_file: "../nifi/flows/salesforce_ingestion.json"
     parameter_context_file: "../nifi/parameter_contexts/dev.json"
     registry_bucket: "openflow-flows"
-    process_group_name: "Salesforce Ingestion [dev]"
+    process_group_name: "Salesforce Ingestion"
 
   - name: "PostgreSQL CDC"
     flow_file: "../nifi/flows/postgres_cdc.json"
     parameter_context_file: "../nifi/parameter_contexts/dev.json"
     registry_bucket: "openflow-flows"
-    process_group_name: "PostgreSQL CDC [dev]"
+    process_group_name: "PostgreSQL CDC"
