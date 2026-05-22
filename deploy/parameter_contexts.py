@@ -9,8 +9,6 @@ from nipyapi.nifi import models as nifi_models
 logger = logging.getLogger(__name__)
 
 SENSITIVE_PARAMS = {
-    "salesforce_client_id",
-    "salesforce_client_secret",
     "snowflake_password",
     "postgres_password",
 }

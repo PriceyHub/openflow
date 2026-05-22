@@ -341,6 +341,7 @@ def main(env: str, flow: Optional[str], dry_run: bool, skip_secrets: bool, targe
             all_param_contexts,
             secrets_prefix=config["aws_secrets_prefix"],
             region=config["aws_region"],
+            profile=config.get("aws_profile"),
         )
     else:
         logger.warning("--skip-secrets set: using placeholder parameter values")

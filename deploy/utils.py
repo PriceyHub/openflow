@@ -70,9 +70,10 @@ def wait_for_nifi(nifi_url: str, timeout: int = 600) -> None:
     raise TimeoutError(f"NiFi did not become ready within {timeout}s at {nifi_url}")
 
 
-def resolve_secrets_from_aws(param_contexts: dict, secrets_prefix: str, region: str) -> dict:
+def resolve_secrets_from_aws(param_contexts: dict, secrets_prefix: str, region: str, profile: str = None) -> dict:
     """Replace REPLACE_FROM_AWS_SECRETS placeholders with real values from Secrets Manager."""
-    sm = boto3.client("secretsmanager", region_name=region)
+    session = boto3.Session(profile_name=profile) if profile else boto3.Session()
+    sm = session.client("secretsmanager", region_name=region)
     resolved = {}
 
     secret_map = {}

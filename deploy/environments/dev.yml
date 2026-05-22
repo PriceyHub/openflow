@@ -5,6 +5,7 @@ nifi_registry_url: "http://127.0.0.1:18080"
 nifi_registry_internal_url: "http://172.31.20.146:18080"
 aws_region: eu-west-2
 aws_secrets_prefix: "openflow/dev"
+aws_profile: "terraform-admin"
 snowflake_account: "cngfczx-ow26289"
 
 flows:
