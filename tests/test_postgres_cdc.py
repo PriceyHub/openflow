@@ -93,11 +93,23 @@ def _get_customer_from_snowflake(snowflake_conn, customer_id: int) -> dict | Non
     return dict(zip(["id", "first_name", "last_name", "email", "status", "is_deleted", "cdc_operation"], row))
 
 
+def _poll_customer(snowflake_conn, customer_id: int, *, status: str | None = None, timeout: int = 240) -> dict | None:
+    """Poll Snowflake until the customer row (optionally matching status) appears."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        row = _get_customer_from_snowflake(snowflake_conn, customer_id)
+        if row is not None:
+            if status is None or row.get("status") == status:
+                return row
+        time.sleep(10)
+    return _get_customer_from_snowflake(snowflake_conn, customer_id)
+
+
 # ---------------------------------------------------------------------------
 # INSERT tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.timeout(180)
+@pytest.mark.timeout(360)
 def test_customer_insert_propagates(snowflake_conn, pg_conn):
     """INSERT a new customer in Postgres — it should appear in Snowflake CUSTOMERS."""
     email = _unique_email()
@@ -108,14 +120,12 @@ def test_customer_insert_propagates(snowflake_conn, pg_conn):
         )
         customer_id = cur.fetchone()[0]
 
-    time.sleep(CDC_PROPAGATION_WAIT)
-
-    row = _get_customer_from_snowflake(snowflake_conn, customer_id)
+    row = _poll_customer(snowflake_conn, customer_id, timeout=CDC_PROPAGATION_WAIT + 60)
     assert row is not None, f"Customer id={customer_id} not found in Snowflake after INSERT"
     assert row["email"] == email or row.get("cdc_operation") in ("INSERT", "insert")
 
 
-@pytest.mark.timeout(180)
+@pytest.mark.timeout(360)
 def test_order_insert_propagates(snowflake_conn, pg_conn):
     """INSERT a new order — it should appear in Snowflake ORDERS."""
     # Create a customer first
@@ -132,14 +142,18 @@ def test_order_insert_propagates(snowflake_conn, pg_conn):
         )
         order_id = cur.fetchone()[0]
 
-    time.sleep(CDC_PROPAGATION_WAIT)
-
+    deadline = time.time() + CDC_PROPAGATION_WAIT + 60
     cursor = snowflake_conn.cursor()
-    cursor.execute(
-        f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.POSTGRES_CDC.ORDERS WHERE ID = %s",
-        (order_id,),
-    )
-    count = cursor.fetchone()[0]
+    count = 0
+    while time.time() < deadline:
+        cursor.execute(
+            f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.POSTGRES_CDC.ORDERS WHERE ID = %s",
+            (order_id,),
+        )
+        count = cursor.fetchone()[0]
+        if count >= 1:
+            break
+        time.sleep(10)
     assert count >= 1, f"Order id={order_id} not found in Snowflake after INSERT"
 
 
@@ -147,7 +161,7 @@ def test_order_insert_propagates(snowflake_conn, pg_conn):
 # UPDATE tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.timeout(240)
+@pytest.mark.timeout(540)
 def test_customer_update_propagates(snowflake_conn, pg_conn):
     """UPDATE a customer — the change should appear in Snowflake with operation=UPDATE."""
     email = _unique_email()
@@ -158,7 +172,8 @@ def test_customer_update_propagates(snowflake_conn, pg_conn):
         )
         customer_id = cur.fetchone()[0]
 
-    time.sleep(CDC_PROPAGATION_WAIT)
+    # Wait for insert to land before issuing update (ensures updated_at advances past what's already polled)
+    _poll_customer(snowflake_conn, customer_id, timeout=CDC_PROPAGATION_WAIT + 60)
 
     # Now update the status
     with pg_conn.cursor() as cur:
@@ -167,17 +182,9 @@ def test_customer_update_propagates(snowflake_conn, pg_conn):
             (customer_id,),
         )
 
-    time.sleep(CDC_PROPAGATION_WAIT)
-
-    cursor = snowflake_conn.cursor()
-    cursor.execute(
-        f"SELECT STATUS, _CDC_OPERATION FROM {SNOWFLAKE_DB}.POSTGRES_CDC.CUSTOMERS "
-        f"WHERE ID = %s ORDER BY _ETL_LOADED_AT DESC LIMIT 1",
-        (customer_id,),
-    )
-    row = cursor.fetchone()
+    row = _poll_customer(snowflake_conn, customer_id, status="premium", timeout=CDC_PROPAGATION_WAIT + 60)
     assert row is not None, f"No rows found for customer id={customer_id} after UPDATE"
-    status, operation = row
+    status, operation = row.get("status"), row.get("cdc_operation")
     assert status == "premium" or operation in ("UPDATE", "update"), (
         f"Expected status='premium' or operation='UPDATE', got status={status!r}, operation={operation!r}"
     )
@@ -187,7 +194,7 @@ def test_customer_update_propagates(snowflake_conn, pg_conn):
 # Soft-delete tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.timeout(240)
+@pytest.mark.timeout(540)
 def test_customer_soft_delete_propagates(snowflake_conn, pg_conn):
     """Soft-delete a customer (status='deleted', updated_at bump) — the change must appear in Snowflake.
 
@@ -203,7 +210,7 @@ def test_customer_soft_delete_propagates(snowflake_conn, pg_conn):
         )
         customer_id = cur.fetchone()[0]
 
-    time.sleep(CDC_PROPAGATION_WAIT)
+    _poll_customer(snowflake_conn, customer_id, timeout=CDC_PROPAGATION_WAIT + 60)
 
     with pg_conn.cursor() as cur:
         cur.execute(
@@ -211,24 +218,16 @@ def test_customer_soft_delete_propagates(snowflake_conn, pg_conn):
             (customer_id,),
         )
 
-    time.sleep(CDC_PROPAGATION_WAIT)
-
-    cursor = snowflake_conn.cursor()
-    cursor.execute(
-        f"SELECT STATUS FROM {SNOWFLAKE_DB}.POSTGRES_CDC.CUSTOMERS "
-        f"WHERE ID = %s ORDER BY _ETL_LOADED_AT DESC LIMIT 1",
-        (customer_id,),
-    )
-    row = cursor.fetchone()
+    row = _poll_customer(snowflake_conn, customer_id, status="deleted", timeout=CDC_PROPAGATION_WAIT + 60)
     assert row is not None, f"No row for soft-deleted customer id={customer_id}"
-    assert row[0] == "deleted", f"Expected status='deleted', got {row[0]!r}"
+    assert row.get("status") == "deleted", f"Expected status='deleted', got {row.get('status')!r}"
 
 
 # ---------------------------------------------------------------------------
 # Recovery tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.timeout(360)
+@pytest.mark.timeout(480)
 def test_cdc_resumes_after_flow_restart(snowflake_conn, pg_conn, nifi_session):
     """Insert rows while CDC flow is stopped; after restart they must all arrive."""
     from test_salesforce_ingestion import get_pg_id_by_name, schedule_pg

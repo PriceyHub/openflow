@@ -69,6 +69,8 @@ def pg_conn():
 
 @pytest.fixture(scope="session")
 def nifi_session():
+    import nipyapi
+
     nifi_url = _require_env("NIFI_URL")
     password = _require_env("NIFI_ADMIN_PASSWORD")
     session = requests.Session()
@@ -80,8 +82,16 @@ def nifi_session():
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     resp.raise_for_status()
-    session.headers["Authorization"] = f"Bearer {resp.text.strip()}"
+    token = resp.text.strip()
+    session.headers["Authorization"] = f"Bearer {token}"
     session.base_url = nifi_url
+
+    # Configure nipyapi so schedule_process_group calls work in recovery tests
+    nipyapi.config.nifi_config.host = nifi_url.rstrip("/") + "/nifi-api"
+    nipyapi.config.nifi_config.verify_ssl = False
+    nipyapi.config.nifi_config.api_key = {"Authorization": token}
+    nipyapi.config.nifi_config.api_key_prefix = {"Authorization": "Bearer"}
+
     return session
 
 

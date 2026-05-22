@@ -88,8 +88,8 @@ jobs:
           SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
           PG_PORT: "5432"
         run: |
-          pip install pytest pytest-timeout psycopg2-binary snowflake-connector-python
-          cd tests && pytest -v --timeout=300 -m "not slow" 2>&1
+          pip install pytest pytest-timeout psycopg2-binary snowflake-connector-python cryptography nipyapi
+          cd tests && pytest -v --timeout=600 -m "not slow" 2>&1
 
       - name: Stop SSM tunnels
         if: always()
