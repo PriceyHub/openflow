@@ -65,6 +65,32 @@ jobs:
           NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_ADMIN_PASSWORD }}
         run: python deploy/deploy.py --env dev
 
+      - name: Load test credentials
+        run: |
+          PG=$(aws secretsmanager get-secret-value --secret-id openflow/dev/postgres --region eu-west-2 --query SecretString --output text)
+          SF=$(aws secretsmanager get-secret-value --secret-id openflow/dev/snowflake --region eu-west-2 --query SecretString --output text)
+          echo "PG_HOST=$(echo $PG       | python3 -c "import json,sys; print(json.load(sys.stdin)['host'])")"     >> $GITHUB_ENV
+          echo "PG_DATABASE=$(echo $PG  | python3 -c "import json,sys; print(json.load(sys.stdin)['database'])")" >> $GITHUB_ENV
+          echo "PG_USER=$(echo $PG      | python3 -c "import json,sys; print(json.load(sys.stdin)['username'])")" >> $GITHUB_ENV
+          echo "PG_PASSWORD=$(echo $PG  | python3 -c "import json,sys; print(json.load(sys.stdin)['password'])")" >> $GITHUB_ENV
+          echo "SNOWFLAKE_USER=$(echo $SF     | python3 -c "import json,sys; print(json.load(sys.stdin)['username'])")" >> $GITHUB_ENV
+          echo "SNOWFLAKE_PASSWORD=$(echo $SF | python3 -c "import json,sys; print(json.load(sys.stdin)['password'])")" >> $GITHUB_ENV
+          echo "SNOWFLAKE_ACCOUNT=cngfczx-ow26289"          >> $GITHUB_ENV
+          echo "SNOWFLAKE_DATABASE=OPENFLOW_DEV"             >> $GITHUB_ENV
+          echo "SNOWFLAKE_WAREHOUSE=OPENFLOW_INGEST_WH_DEV"  >> $GITHUB_ENV
+          echo "SNOWFLAKE_SCHEMA=POSTGRES_CDC"               >> $GITHUB_ENV
+          echo "NIFI_URL=https://127.0.0.1:8443"             >> $GITHUB_ENV
+          echo "S3_STAGING_BUCKET=openflow-staging-dev-eu-west-2" >> $GITHUB_ENV
+          echo "AWS_REGION=eu-west-2"                        >> $GITHUB_ENV
+
+      - name: Run integration tests
+        env:
+          NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_ADMIN_PASSWORD }}
+          PG_PORT: "5432"
+        run: |
+          pip install pytest pytest-timeout psycopg2-binary snowflake-connector-python
+          cd tests && pytest -v --timeout=300 -m "not slow" 2>&1
+
       - name: Stop SSM tunnels
         if: always()
         run: |

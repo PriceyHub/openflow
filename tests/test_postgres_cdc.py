@@ -55,11 +55,6 @@ def ensure_pg_test_tables(pg_conn):
                 updated_at      TIMESTAMPTZ DEFAULT NOW()
             )
         """)
-        # Ensure these tables are part of the publication
-        try:
-            cur.execute("ALTER PUBLICATION openflow_pub ADD TABLE customers, orders")
-        except psycopg2.errors.DuplicateObject:
-            pass
 
 
 # ---------------------------------------------------------------------------
@@ -188,16 +183,21 @@ def test_customer_update_propagates(snowflake_conn, pg_conn):
 
 
 # ---------------------------------------------------------------------------
-# DELETE tests
+# Soft-delete tests
 # ---------------------------------------------------------------------------
 
 @pytest.mark.timeout(240)
-def test_customer_delete_propagates(snowflake_conn, pg_conn):
-    """DELETE a customer — it should appear in Snowflake with IS_DELETED=TRUE or operation=DELETE."""
+def test_customer_soft_delete_propagates(snowflake_conn, pg_conn):
+    """Soft-delete a customer (status='deleted', updated_at bump) — the change must appear in Snowflake.
+
+    Hard DELETEs are not captured by QueryDatabaseTableRecord. The recommended pattern is
+    a soft-delete flag on the source table, which triggers an updated_at bump and gets
+    picked up on the next poll cycle.
+    """
     email = _unique_email()
     with pg_conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO customers (first_name, last_name, email) VALUES ('Delete', 'Test', %s) RETURNING id",
+            "INSERT INTO customers (first_name, last_name, email, status) VALUES ('SoftDel', 'Test', %s, 'active') RETURNING id",
             (email,),
         )
         customer_id = cur.fetchone()[0]
@@ -205,22 +205,22 @@ def test_customer_delete_propagates(snowflake_conn, pg_conn):
     time.sleep(CDC_PROPAGATION_WAIT)
 
     with pg_conn.cursor() as cur:
-        cur.execute("DELETE FROM customers WHERE id = %s", (customer_id,))
+        cur.execute(
+            "UPDATE customers SET status = 'deleted', updated_at = NOW() WHERE id = %s",
+            (customer_id,),
+        )
 
     time.sleep(CDC_PROPAGATION_WAIT)
 
     cursor = snowflake_conn.cursor()
     cursor.execute(
-        f"SELECT IS_DELETED, _CDC_OPERATION FROM {SNOWFLAKE_DB}.POSTGRES_CDC.CUSTOMERS "
+        f"SELECT STATUS FROM {SNOWFLAKE_DB}.POSTGRES_CDC.CUSTOMERS "
         f"WHERE ID = %s ORDER BY _ETL_LOADED_AT DESC LIMIT 1",
         (customer_id,),
     )
     row = cursor.fetchone()
-    assert row is not None, f"No rows for deleted customer id={customer_id}"
-    is_deleted, operation = row
-    assert is_deleted is True or operation in ("DELETE", "delete"), (
-        f"Expected IS_DELETED=True or operation=DELETE, got is_deleted={is_deleted!r}, operation={operation!r}"
-    )
+    assert row is not None, f"No row for soft-deleted customer id={customer_id}"
+    assert row[0] == "deleted", f"Expected status='deleted', got {row[0]!r}"
 
 
 # ---------------------------------------------------------------------------
