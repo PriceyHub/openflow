@@ -72,7 +72,9 @@ def wait_for_nifi(nifi_url: str, timeout: int = 600) -> None:
 
 def resolve_secrets_from_aws(param_contexts: dict, secrets_prefix: str, region: str, profile: str = None) -> dict:
     """Replace REPLACE_FROM_AWS_SECRETS placeholders with real values from Secrets Manager."""
-    session = boto3.Session(profile_name=profile) if profile else boto3.Session()
+    import botocore.session as _bc
+    effective_profile = profile if profile and profile in _bc.Session().available_profiles else None
+    session = boto3.Session(profile_name=effective_profile) if effective_profile else boto3.Session()
     sm = session.client("secretsmanager", region_name=region)
     resolved = {}
 
