@@ -60,10 +60,70 @@ jobs:
           timeout 60 bash -c \
             'until curl -s http://localhost:18080/nifi-registry-api/buckets -o /dev/null; do sleep 3; done'
 
+          # Keepalive: ping NiFi every 60s to prevent SSM idle timeout (default 20 min)
+          while true; do
+            curl -sk https://localhost:8443/nifi-api/system-diagnostics -o /dev/null 2>&1 || true
+            sleep 60
+          done &
+          echo $! > /tmp/nifi-keepalive.pid
+
       - name: Deploy flows
         env:
           NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_ADMIN_PASSWORD }}
         run: python deploy/deploy.py --env dev
+
+      - name: NiFi pipeline diagnostics
+        if: always()
+        env:
+          NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_ADMIN_PASSWORD }}
+        run: |
+          echo "=== NiFi auth ==="
+          TOKEN=$(curl -sk -X POST https://localhost:8443/nifi-api/access/token \
+            -d "username=admin&password=${NIFI_ADMIN_PASSWORD}" \
+            -H "Content-Type: application/x-www-form-urlencoded") || { echo "Cannot reach NiFi"; exit 0; }
+          echo "Token acquired"
+
+          echo "=== Process groups ==="
+          curl -sk -H "Authorization: Bearer $TOKEN" \
+            "https://localhost:8443/nifi-api/process-groups/root/process-groups" | \
+            python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for pg in data.get('processGroups', []):
+    c = pg['component']
+    s = pg.get('status', {}).get('aggregateSnapshot', {})
+    print(f\"{c['name']}: state={c['state']} | running={s.get('runningCount',0)} stopped={s.get('stoppedCount',0)} invalid={s.get('invalidCount',0)} disabled={s.get('disabledCount',0)}\")
+" || echo "(parse error)"
+
+          echo "=== Controller services ==="
+          curl -sk -H "Authorization: Bearer $TOKEN" \
+            "https://localhost:8443/nifi-api/flow/controller/controller-services" | \
+            python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for svc in data.get('controllerServices', []):
+    c = svc['component']
+    print(f\"{c['name']}: {c['state']} ({c.get('type','').split('.')[-1]})\")
+" || echo "(parse error)"
+
+          echo "=== Bulletins (last 30 errors/warnings) ==="
+          curl -sk -H "Authorization: Bearer $TOKEN" \
+            "https://localhost:8443/nifi-api/flow/bulletin-board?limit=30" | \
+            python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+bulletins = data.get('bulletinBoard', {}).get('bulletins', [])
+if not bulletins:
+    print('No bulletins')
+for b in bulletins:
+    bb = b.get('bulletin', {})
+    lvl = bb.get('level','')
+    if lvl in ('ERROR','WARNING'):
+        print(f\"{bb.get('timestamp')} [{lvl}] {bb.get('sourceType')} '{bb.get('sourceName')}': {bb.get('message')}\")
+" || echo "(parse error)"
+
+          echo "=== S3 staging bucket ==="
+          aws s3 ls s3://openflow-staging-dev-eu-west-2/ --recursive 2>&1 | head -30 || echo "(no access or empty)"
 
       - name: Load test credentials
         run: |
@@ -94,5 +154,6 @@ jobs:
       - name: Stop SSM tunnels
         if: always()
         run: |
+          kill "$(cat /tmp/nifi-keepalive.pid)" 2>/dev/null || true
           kill "$(cat /tmp/nifi-tunnel.pid)"    2>/dev/null || true
           kill "$(cat /tmp/registry-tunnel.pid)" 2>/dev/null || true
