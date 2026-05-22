@@ -125,6 +125,7 @@ else
       -u "$SNOW_USER" \
       --password "$SNOW_PASS" \
       -v db_name="OPENFLOW_${SNOW_ENV_UPPER}" \
+      -v wh_name="OPENFLOW_INGEST_WH_${SNOW_ENV_UPPER}" \
       -f "$sql_file" \
       --noup 2>&1 | tail -5 || echo "WARNING: $sql_file returned non-zero (check manually)"
   done

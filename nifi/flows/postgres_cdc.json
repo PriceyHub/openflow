@@ -606,7 +606,7 @@
         },
         "properties": {
           "Bucket": "#{s3_staging_bucket}",
-          "Object Key": "${s3.prefix}/${uuid()}.json",
+          "Object Key": "staged/${s3.prefix}/${uuid()}.json",
           "Region": "#{s3_region}",
           "Use Path Style Access": "false",
           "Server Side Encryption": "AES256",
