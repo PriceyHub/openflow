@@ -5,15 +5,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   deploy-dev:
     name: Deploy to dev
     runs-on: ubuntu-latest
-    environment: dev
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
