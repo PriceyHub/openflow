@@ -286,8 +286,56 @@ def _enable_controller_services(pg_id: str) -> None:
         logger.warning("Could not enable controller services for PG %s: %s", pg_id, exc)
 
 
+def _fix_aws_credentials_provider(pg_id: str) -> None:
+    """Ensure AWSCredentialsProviderControllerService uses default (IAM role) credentials.
+
+    NiFi can deploy this CS with anonymous-credentials=true from a stale registry snapshot.
+    We correct it before enabling so S3 writes succeed via the EC2 instance profile.
+    """
+    import requests as _requests
+
+    try:
+        flow_api = nipyapi.nifi.FlowApi()
+        services = flow_api.get_controller_services_from_group(pg_id).controller_services or []
+        aws_svcs = [s for s in services if "AWSCredentials" in (s.component.name or "")]
+        if not aws_svcs:
+            return
+
+        nifi_base = nipyapi.config.nifi_config.host
+        token = (nipyapi.config.nifi_config.api_key or {}).get("tokenAuth", "")
+        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+        for svc in aws_svcs:
+            props = getattr(getattr(svc, "component", None), "properties", {}) or {}
+            if props.get("anonymous-credentials") != "true":
+                continue
+            logger.info("Fixing AWSCredentialsProviderControllerService %s: resetting to default-credentials", svc.id)
+            patch = {
+                "revision": {"version": svc.revision.version},
+                "component": {
+                    "id": svc.id,
+                    "properties": {
+                        "default-credentials": "true",
+                        "anonymous-credentials": "false",
+                    },
+                },
+            }
+            resp = _requests.put(
+                f"{nifi_base}/controller-services/{svc.id}",
+                json=patch,
+                headers=headers,
+                verify=False,
+                timeout=15,
+            )
+            resp.raise_for_status()
+            logger.info("AWSCredentialsProviderControllerService %s corrected to default-credentials", svc.id)
+    except Exception as exc:
+        logger.warning("Could not fix AWS credentials provider CS in PG %s: %s", pg_id, exc)
+
+
 def _start_process_group(pg_id: str) -> None:
     try:
+        _fix_aws_credentials_provider(pg_id)
         _enable_controller_services(pg_id)
         nipyapi.canvas.schedule_process_group(pg_id, scheduled=True)
         logger.info("Started process group %s", pg_id)
