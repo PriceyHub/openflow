@@ -423,12 +423,9 @@
           "y": 100.0
         },
         "properties": {
-          "salesforce-instance-url": "#{salesforce_instance_url}",
-          "salesforce-client-id": "#{salesforce_client_id}",
-          "salesforce-client-secret": "#{salesforce_client_secret}",
-          "sObject Name": "Account",
-          "salesforce-include-deleted": "false",
-          "Record Writer": "0002b2c3-d4e5-0002-0013-000000000013"
+          "sobject-name": "Account",
+          "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
+          "salesforce-url": "#{salesforce_instance_url}"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -543,9 +540,9 @@
           "record-reader": "0002b2c3-d4e5-0002-0012-000000000012",
           "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
           "merge-strategy": "Bin-Packing Algorithm",
-          "minimum-number-of-records": "1000",
-          "maximum-number-of-records": "50000",
-          "max-bin-count": "5"
+          "min-records": "1000",
+          "max-records": "50000",
+          "max.bin.count": "5"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -665,12 +662,9 @@
           "y": 400.0
         },
         "properties": {
-          "salesforce-instance-url": "#{salesforce_instance_url}",
-          "salesforce-client-id": "#{salesforce_client_id}",
-          "salesforce-client-secret": "#{salesforce_client_secret}",
-          "sObject Name": "Contact",
-          "salesforce-include-deleted": "false",
-          "Record Writer": "0002b2c3-d4e5-0002-0013-000000000013"
+          "sobject-name": "Contact",
+          "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
+          "salesforce-url": "#{salesforce_instance_url}"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -785,9 +779,9 @@
           "record-reader": "0002b2c3-d4e5-0002-0012-000000000012",
           "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
           "merge-strategy": "Bin-Packing Algorithm",
-          "minimum-number-of-records": "1000",
-          "maximum-number-of-records": "50000",
-          "max-bin-count": "5"
+          "min-records": "1000",
+          "max-records": "50000",
+          "max.bin.count": "5"
         },
         "propertyDescriptors": {},
         "style": {},

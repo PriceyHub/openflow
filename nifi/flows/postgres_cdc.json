@@ -406,10 +406,10 @@
           "db-type": "PostgreSQL",
           "Table Name": "customers",
           "Maximum-value Columns": "updated_at",
-          "record-writer": "0001b2c3-d4e5-cdc0-0001-000000000002",
           "Fetch Size": "10000",
           "Max Rows Per Flow File": "50000",
-          "Output Batch Size": "0"
+          "Output Batch Size": "0",
+          "qdbtr-record-writer": "0001b2c3-d4e5-cdc0-0001-000000000002"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -449,10 +449,10 @@
           "db-type": "PostgreSQL",
           "Table Name": "orders",
           "Maximum-value Columns": "updated_at",
-          "record-writer": "0001b2c3-d4e5-cdc0-0001-000000000002",
           "Fetch Size": "10000",
           "Max Rows Per Flow File": "50000",
-          "Output Batch Size": "0"
+          "Output Batch Size": "0",
+          "qdbtr-record-writer": "0001b2c3-d4e5-cdc0-0001-000000000002"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -567,8 +567,8 @@
           "merge-strategy": "Bin-Packing Algorithm",
           "min-records": "100",
           "max-records": "10000",
-          "max-bin-count": "10",
-          "correlation-attribute-name": "cdc.table"
+          "correlation-attribute-name": "cdc.table",
+          "max.bin.count": "10"
         },
         "propertyDescriptors": {},
         "style": {},
