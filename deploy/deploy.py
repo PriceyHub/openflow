@@ -286,6 +286,89 @@ def _enable_controller_services(pg_id: str) -> None:
         logger.warning("Could not enable controller services for PG %s: %s", pg_id, exc)
 
 
+def _fix_convert_record_cs_refs(pg_id: str) -> None:
+    """Resolve ConvertRecord CS references after deploy.
+
+    NiFi 2.0 does not reliably map versionedComponentId → instanceIdentifier for
+    Record Reader/Writer properties when deploying hand-crafted flow definitions.
+    This looks up each CS by name and patches ConvertRecord processors that still
+    reference a non-existent identifier.
+    """
+    import requests as _requests
+
+    try:
+        nifi_base = nipyapi.config.nifi_config.host
+        headers = {"Authorization": f"Bearer {(nipyapi.config.nifi_config.api_key or {}).get('tokenAuth', '')}",
+                   "Content-Type": "application/json"}
+
+        # Build name → instance-id map for all CSes in the PG
+        svc_resp = nipyapi.nifi.FlowApi().get_controller_services_from_group(pg_id)
+        cs_by_name = {
+            s.component.name: s.id
+            for s in (svc_resp.controller_services or [])
+        }
+
+        procs = _requests.get(f"{nifi_base}/process-groups/{pg_id}/processors",
+                              headers=headers, verify=False, timeout=15).json()
+
+        for proc in procs.get("processors", []):
+            if "ConvertRecord" not in proc["component"]["name"]:
+                continue
+            props = proc["component"]["config"]["properties"]
+            reader_val = props.get("Record Reader", "")
+            writer_val = props.get("Record Writer", "")
+
+            # Check if either property is an unresolved versionedComponentId
+            # (i.e., it doesn't match any known CS instance id)
+            known_ids = set(cs_by_name.values())
+            needs_fix = (reader_val and reader_val not in known_ids) or \
+                        (writer_val and writer_val not in known_ids)
+            if not needs_fix:
+                continue
+
+            # Match by CS name substring: JsonTreeReader → Record Reader, JsonRecordSetWriter → Record Writer
+            new_reader = next((cid for cname, cid in cs_by_name.items() if "TreeReader" in cname or "JsonTreeReader" in cname), None)
+            new_writer = next((cid for cname, cid in cs_by_name.items() if "RecordSetWriter" in cname or "JsonRecordSetWriter" in cname), None)
+            if not new_reader or not new_writer:
+                logger.warning("Could not find JsonTreeReader/JsonRecordSetWriter CS in PG %s to fix ConvertRecord", pg_id)
+                continue
+
+            entity = _requests.get(f"{nifi_base}/processors/{proc['id']}",
+                                   headers=headers, verify=False, timeout=15).json()
+            entity["component"]["config"]["properties"]["Record Reader"] = new_reader
+            entity["component"]["config"]["properties"]["Record Writer"] = new_writer
+            # Null out any stale lowercase-hyphen variants
+            entity["component"]["config"]["properties"]["record-reader"] = None
+            entity["component"]["config"]["properties"]["record-writer"] = None
+            resp = _requests.put(f"{nifi_base}/processors/{proc['id']}",
+                                 headers=headers, verify=False, json=entity, timeout=15)
+            if resp.ok:
+                logger.info("Fixed ConvertRecord '%s' CS refs in PG %s", proc["component"]["name"], pg_id)
+            else:
+                logger.warning("Could not fix ConvertRecord '%s': %s", proc["component"]["name"], resp.text[:200])
+
+        # Also auto-terminate any unconnected 'set state fail' relationships
+        for proc in procs.get("processors", []):
+            rels = proc["component"].get("relationships", [])
+            if not any(r["name"] == "set state fail" for r in rels):
+                continue
+            auto_term = proc["component"]["config"].get("autoTerminatedRelationships", [])
+            if "set state fail" in auto_term:
+                continue
+            entity = _requests.get(f"{nifi_base}/processors/{proc['id']}",
+                                   headers=headers, verify=False, timeout=15).json()
+            entity["component"]["config"].setdefault("autoTerminatedRelationships", [])
+            if "set state fail" not in entity["component"]["config"]["autoTerminatedRelationships"]:
+                entity["component"]["config"]["autoTerminatedRelationships"].append("set state fail")
+                resp = _requests.put(f"{nifi_base}/processors/{proc['id']}",
+                                     headers=headers, verify=False, json=entity, timeout=15)
+                if resp.ok:
+                    logger.info("Auto-terminated 'set state fail' on '%s'", proc["component"]["name"])
+
+    except Exception as exc:
+        logger.warning("Could not fix ConvertRecord CS refs in PG %s: %s", pg_id, exc)
+
+
 def _fix_aws_credentials_provider(pg_id: str) -> None:
     """Ensure AWSCredentialsProviderControllerService uses default (IAM role) credentials.
 
@@ -337,6 +420,7 @@ def _fix_aws_credentials_provider(pg_id: str) -> None:
 
 def _start_process_group(pg_id: str) -> None:
     try:
+        _fix_convert_record_cs_refs(pg_id)
         _fix_aws_credentials_provider(pg_id)
         _enable_controller_services(pg_id)
         nipyapi.canvas.schedule_process_group(pg_id, scheduled=True)
