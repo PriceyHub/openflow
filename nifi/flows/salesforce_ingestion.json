@@ -404,6 +404,37 @@
         "propertyDescriptors": {},
         "scheduledState": "ENABLED",
         "annotationData": ""
+      },
+      {
+        "identifier": "0002b2c3-d4e5-0002-0014-000000000014",
+        "instanceIdentifier": "0002b2c3-d4e5-0002-0014-000000000014",
+        "name": "SalesforceOAuth2",
+        "componentType": "CONTROLLER_SERVICE",
+        "type": "org.apache.nifi.oauth2.StandardOauth2AccessTokenProvider",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-oauth2-provider-nar",
+          "version": "2.0.0"
+        },
+        "properties": {
+          "grant-type": "client_credentials",
+          "authorization-server-url": "#{salesforce_instance_url}/services/oauth2/token",
+          "client-id": "#{salesforce_client_id}",
+          "client-secret": "#{salesforce_client_secret}",
+          "client-authentication-strategy": "REQUEST_BODY"
+        },
+        "propertyDescriptors": {},
+        "controllerServiceApis": [
+          {
+            "type": "org.apache.nifi.oauth2.OAuth2AccessTokenProvider",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-services-api-nar",
+              "version": "2.0.0"
+            }
+          }
+        ],
+        "scheduledState": "ENABLED"
       }
     ],
     "processGroups": [],
@@ -425,7 +456,8 @@
         "properties": {
           "sobject-name": "Account",
           "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
-          "salesforce-url": "#{salesforce_instance_url}"
+          "salesforce-url": "#{salesforce_instance_url}",
+          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0014-000000000014"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -664,7 +696,8 @@
         "properties": {
           "sobject-name": "Contact",
           "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
-          "salesforce-url": "#{salesforce_instance_url}"
+          "salesforce-url": "#{salesforce_instance_url}",
+          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0014-000000000014"
         },
         "propertyDescriptors": {},
         "style": {},
