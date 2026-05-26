@@ -2078,13 +2078,14 @@
         "properties": {
           "correlation-attribute-name": "cdc.table",
           "Attribute Strategy": "Keep Only Common Attributes",
-          "min-records": "100",
+          "min-records": "1",
           "record-writer": "0001b2c3-d4e5-cdc0-0001-000000000002",
           "merge-strategy": "Bin-Packing Algorithm",
           "record-reader": "0001b2c3-d4e5-cdc0-0001-000000000001",
           "max-records": "10000",
           "min-bin-size": "0 B",
-          "max.bin.count": "10"
+          "max.bin.count": "10",
+          "max-bin-age": "60 sec"
         },
         "propertyDescriptors": {
           "max-bin-age": {
