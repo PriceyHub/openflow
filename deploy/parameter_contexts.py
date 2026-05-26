@@ -9,6 +9,7 @@ from nipyapi.nifi import models as nifi_models
 logger = logging.getLogger(__name__)
 
 SENSITIVE_PARAMS = {
+    "salesforce_client_secret",
     "snowflake_password",
     "postgres_password",
 }
@@ -18,7 +19,7 @@ def _build_parameter_entity(name: str, value: str, sensitive: bool) -> dict:
     return {
         "parameter": {
             "name": name,
-            "value": value if not sensitive else None,
+            "value": value,
             "sensitive": sensitive,
         },
         "canWrite": True,
