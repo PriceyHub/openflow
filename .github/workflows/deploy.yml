@@ -76,22 +76,10 @@ jobs:
         run: python deploy/deploy.py --env dev
 
       - name: Wait for NiFi processors to start
-        env:
-          NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_ADMIN_PASSWORD }}
         run: |
-          TOKEN=$(curl -sk -X POST https://localhost:8443/nifi-api/access/token \
-            -d "username=admin&password=${NIFI_ADMIN_PASSWORD}" \
-            -H "Content-Type: application/x-www-form-urlencoded")
-          echo "Waiting for PostgreSQL CDC processors to reach running state..."
-          deadline=$(($(date +%s) + 360))
-          while [ $(date +%s) -lt $deadline ]; do
-            RUNNING=$(curl -sk -H "Authorization: Bearer $TOKEN" \
-              "https://localhost:8443/nifi-api/process-groups/root/process-groups" | \
-              jq '[.processGroups[] | select(.component.name=="PostgreSQL CDC") | (.status.aggregateSnapshot.runningCount//0)] | add // 0')
-            echo "  PostgreSQL CDC running=$RUNNING"
-            [ "$RUNNING" -gt 0 ] && { echo "Ready."; break; }
-            sleep 15
-          done
+          echo "Waiting 90s for processors to stabilise after deploy..."
+          sleep 90
+          echo "Done."
 
       - name: NiFi pipeline diagnostics
         if: always()
