@@ -310,19 +310,21 @@ def _fix_aws_credentials_provider(pg_id: str) -> None:
             if props.get("anonymous-credentials") != "true":
                 continue
             logger.info("Fixing AWSCredentialsProviderControllerService %s: resetting to default-credentials", svc.id)
-            patch = {
-                "revision": {"version": svc.revision.version},
-                "component": {
-                    "id": svc.id,
-                    "properties": {
-                        "default-credentials": "true",
-                        "anonymous-credentials": "false",
-                    },
-                },
-            }
+            # GET the full entity so the PUT body has all required fields (name, type, bundle)
+            get_resp = _requests.get(
+                f"{nifi_base}/controller-services/{svc.id}",
+                headers=headers,
+                verify=False,
+                timeout=15,
+            )
+            get_resp.raise_for_status()
+            entity = get_resp.json()
+            entity["revision"]["version"] = entity["revision"]["version"]
+            entity["component"]["properties"]["default-credentials"] = "true"
+            entity["component"]["properties"]["anonymous-credentials"] = "false"
             resp = _requests.put(
                 f"{nifi_base}/controller-services/{svc.id}",
-                json=patch,
+                json=entity,
                 headers=headers,
                 verify=False,
                 timeout=15,
