@@ -606,7 +606,7 @@
         },
         "properties": {
           "Bucket": "#{s3_staging_bucket}",
-          "Object Key": "staged/${s3.prefix}/${uuid()}.json",
+          "Object Key": "staged/${s3.prefix}/${uuid}.json",
           "Region": "#{s3_region}",
           "Use Path Style Access": "false",
           "Server Side Encryption": "AES256",
@@ -647,7 +647,7 @@
         },
         "properties": {
           "Database Connection Pooling Service": "0001b2c3-d4e5-cdc0-0001-000000000004",
-          "SQL select query": "COPY INTO #{snowflake_database}.RAW.${target.table.raw} (_raw_json, _cdc_operation, _cdc_timestamp, _source_file, _batch_id) FROM (SELECT $1, 'UPSERT', CURRENT_TIMESTAMP(), METADATA$FILENAME, '${s3.key}' FROM @#{snowflake_database}.RAW.OPENFLOW_S3_STAGE/${s3.prefix}/) FILE_FORMAT=(TYPE=JSON STRIP_OUTER_ARRAY=TRUE) ON_ERROR='CONTINUE' PURGE=FALSE",
+          "SQL select query": "COPY INTO #{snowflake_database}.RAW.${target.table.raw} (_raw_json, _cdc_operation, _cdc_timestamp, _source_file, _batch_id) FROM (SELECT $1, 'UPSERT', CURRENT_TIMESTAMP(), METADATA$FILENAME, '${s3.key}' FROM @#{snowflake_database}.RAW.OPENFLOW_S3_STAGE/staged/${s3.prefix}/) FILE_FORMAT=(TYPE=JSON STRIP_OUTER_ARRAY=TRUE) ON_ERROR='CONTINUE' PURGE=FALSE",
           "Max Wait Time": "0 millis",
           "Output Batch Size": "0",
           "Fetch Size": "0",
