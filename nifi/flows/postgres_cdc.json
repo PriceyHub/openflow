@@ -1,109 +1,5 @@
 {
-  "encodingVersion": "1.0",
   "externalControllerServices": {},
-  "parameterContexts": {
-    "postgres-cdc-params": {
-      "componentType": "PARAMETER_CONTEXT",
-      "inheritedParameterContexts": [],
-      "name": "postgres-cdc-params",
-      "parameters": [
-        {
-          "name": "postgres_username",
-          "provided": false,
-          "sensitive": false,
-          "value": "chrisdb"
-        },
-        {
-          "name": "postgres_slot_name",
-          "provided": false,
-          "sensitive": false,
-          "value": "openflow_dev_slot"
-        },
-        {
-          "name": "s3_region",
-          "provided": false,
-          "sensitive": false,
-          "value": "eu-west-2"
-        },
-        {
-          "name": "s3_staging_bucket",
-          "provided": false,
-          "sensitive": false,
-          "value": "openflow-staging-dev-eu-west-2"
-        },
-        {
-          "name": "snowflake_account",
-          "provided": false,
-          "sensitive": false,
-          "value": "cngfczx-ow26289"
-        },
-        {
-          "name": "postgres_host",
-          "provided": false,
-          "sensitive": false,
-          "value": "chrisdb.c5sa8e06yt0i.eu-west-2.rds.amazonaws.com"
-        },
-        {
-          "name": "snowflake_warehouse",
-          "provided": false,
-          "sensitive": false,
-          "value": "OPENFLOW_INGEST_WH_DEV"
-        },
-        {
-          "name": "postgres_port",
-          "provided": false,
-          "sensitive": false,
-          "value": "5432"
-        },
-        {
-          "name": "postgres_poll_interval",
-          "provided": false,
-          "sensitive": false,
-          "value": "60 sec"
-        },
-        {
-          "name": "snowflake_password",
-          "provided": false,
-          "sensitive": true
-        },
-        {
-          "name": "snowflake_database",
-          "provided": false,
-          "sensitive": false,
-          "value": "OPENFLOW_DEV"
-        },
-        {
-          "name": "snowflake_username",
-          "provided": false,
-          "sensitive": false,
-          "value": "OPENFLOW_NIFI_SVC"
-        },
-        {
-          "name": "snowflake_schema",
-          "provided": false,
-          "sensitive": false,
-          "value": "POSTGRES_CDC"
-        },
-        {
-          "name": "postgres_password",
-          "provided": false,
-          "sensitive": true
-        },
-        {
-          "name": "postgres_database",
-          "provided": false,
-          "sensitive": false,
-          "value": "postgres"
-        },
-        {
-          "name": "postgres_publication",
-          "provided": false,
-          "sensitive": false,
-          "value": "openflow_pub"
-        }
-      ]
-    }
-  },
   "flowContents": {
     "comments": "Polls RDS Postgres (customers, orders) for changed rows via updated_at and streams them into Snowflake via S3. Requires updated_at column on source tables. DELETEs not captured \u00e2\u20ac\u201d use soft-delete (is_deleted flag) on the source if needed.",
     "componentType": "PROCESS_GROUP",
@@ -1153,12 +1049,12 @@
           "y": 350.0
         },
         "properties": {
-          "target.table.raw": "PG_${querydbtable.tableName:toUpper()}_RAW",
+          "target.table.raw": "PG_${tablename:toUpper()}_RAW",
           "Store State": "Do not store state",
           "canonical-value-lookup-cache-size": "100",
           "cdc.loaded_at": "${now():toNumber()}",
-          "cdc.table": "${querydbtable.tableName}",
-          "s3.prefix": "postgres_cdc/${querydbtable.tableName}/${now():format('yyyy/MM/dd')}"
+          "cdc.table": "${tablename}",
+          "s3.prefix": "postgres_cdc/${tablename}/${now():format('yyyy/MM/dd')}"
         },
         "propertyDescriptors": {
           "target.table.raw": {
@@ -2536,5 +2432,114 @@
     ],
     "remoteProcessGroups": [],
     "variables": {}
+  },
+  "parameterContexts": {
+    "postgres-cdc-params": {
+      "componentType": "PARAMETER_CONTEXT",
+      "inheritedParameterContexts": [],
+      "name": "postgres-cdc-params",
+      "parameters": [
+        {
+          "name": "postgres_username",
+          "provided": false,
+          "sensitive": false,
+          "value": "chrisdb"
+        },
+        {
+          "name": "postgres_slot_name",
+          "provided": false,
+          "sensitive": false,
+          "value": "openflow_dev_slot"
+        },
+        {
+          "name": "s3_region",
+          "provided": false,
+          "sensitive": false,
+          "value": "eu-west-2"
+        },
+        {
+          "name": "s3_staging_bucket",
+          "provided": false,
+          "sensitive": false,
+          "value": "openflow-staging-dev-eu-west-2"
+        },
+        {
+          "name": "snowflake_account",
+          "provided": false,
+          "sensitive": false,
+          "value": "cngfczx-ow26289"
+        },
+        {
+          "name": "postgres_host",
+          "provided": false,
+          "sensitive": false,
+          "value": "chrisdb.c5sa8e06yt0i.eu-west-2.rds.amazonaws.com"
+        },
+        {
+          "name": "snowflake_warehouse",
+          "provided": false,
+          "sensitive": false,
+          "value": "OPENFLOW_INGEST_WH_DEV"
+        },
+        {
+          "name": "postgres_port",
+          "provided": false,
+          "sensitive": false,
+          "value": "5432"
+        },
+        {
+          "name": "postgres_poll_interval",
+          "provided": false,
+          "sensitive": false,
+          "value": "60 sec"
+        },
+        {
+          "name": "snowflake_password",
+          "provided": false,
+          "sensitive": true
+        },
+        {
+          "name": "snowflake_database",
+          "provided": false,
+          "sensitive": false,
+          "value": "OPENFLOW_DEV"
+        },
+        {
+          "name": "snowflake_username",
+          "provided": false,
+          "sensitive": false,
+          "value": "OPENFLOW_NIFI_SVC"
+        },
+        {
+          "name": "snowflake_schema",
+          "provided": false,
+          "sensitive": false,
+          "value": "POSTGRES_CDC"
+        },
+        {
+          "name": "postgres_password",
+          "provided": false,
+          "sensitive": true
+        },
+        {
+          "name": "postgres_database",
+          "provided": false,
+          "sensitive": false,
+          "value": "postgres"
+        },
+        {
+          "name": "postgres_publication",
+          "provided": false,
+          "sensitive": false,
+          "value": "openflow_pub"
+        }
+      ]
+    }
+  },
+  "snapshotMetadata": {
+    "author": "anonymous",
+    "comments": "Fix: use ${tablename} attribute (was querydbtable.tableName) \u2014 CDC fully working",
+    "timestamp": 1779826160806,
+    "version": 36
   }
 }
