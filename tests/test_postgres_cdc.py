@@ -66,31 +66,20 @@ def _unique_email() -> str:
     return f"test_{uuid.uuid4().hex[:8]}@openflow-test.invalid"
 
 
-def _count_cdc_rows(snowflake_conn, table: str, operation: str | None = None, batch_id: str | None = None) -> int:
-    cursor = snowflake_conn.cursor()
-    base = f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.POSTGRES_CDC.{table.upper()}"
-    conditions = []
-    if operation:
-        conditions.append(f"_CDC_OPERATION = '{operation}'")
-    if batch_id:
-        conditions.append(f"_ETL_BATCH_ID = '{batch_id}'")
-    if conditions:
-        base += " WHERE " + " AND ".join(conditions)
-    cursor.execute(base)
-    return cursor.fetchone()[0]
-
-
 def _get_customer_from_snowflake(snowflake_conn, customer_id: int) -> dict | None:
+    """Return the most recent RAW row for this customer id, parsed from _raw_json."""
     cursor = snowflake_conn.cursor()
     cursor.execute(
-        f"SELECT ID, FIRST_NAME, LAST_NAME, EMAIL, STATUS, IS_DELETED, _CDC_OPERATION "
-        f"FROM {SNOWFLAKE_DB}.POSTGRES_CDC.CUSTOMERS WHERE ID = %s ORDER BY _ETL_LOADED_AT DESC LIMIT 1",
+        f"SELECT _raw_json:id::INTEGER, _raw_json:first_name::VARCHAR, _raw_json:last_name::VARCHAR, "
+        f"_raw_json:email::VARCHAR, _raw_json:status::VARCHAR, _CDC_OPERATION "
+        f"FROM {SNOWFLAKE_DB}.RAW.PG_CUSTOMERS_RAW "
+        f"WHERE _raw_json:id::INTEGER = %s ORDER BY _LOADED_AT DESC LIMIT 1",
         (customer_id,),
     )
     row = cursor.fetchone()
     if not row:
         return None
-    return dict(zip(["id", "first_name", "last_name", "email", "status", "is_deleted", "cdc_operation"], row))
+    return dict(zip(["id", "first_name", "last_name", "email", "status", "cdc_operation"], row))
 
 
 def _poll_customer(snowflake_conn, customer_id: int, *, status: str | None = None, timeout: int = 240) -> dict | None:
@@ -147,7 +136,7 @@ def test_order_insert_propagates(snowflake_conn, pg_conn):
     count = 0
     while time.time() < deadline:
         cursor.execute(
-            f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.POSTGRES_CDC.ORDERS WHERE ID = %s",
+            f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.RAW.PG_ORDERS_RAW WHERE _raw_json:id::INTEGER = %s",
             (order_id,),
         )
         count = cursor.fetchone()[0]
@@ -257,7 +246,7 @@ def test_cdc_resumes_after_flow_restart(snowflake_conn, pg_conn, nifi_session):
     missing = []
     for cid in inserted_ids:
         cursor.execute(
-            f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.POSTGRES_CDC.CUSTOMERS WHERE ID = %s",
+            f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.RAW.PG_CUSTOMERS_RAW WHERE _raw_json:id::INTEGER = %s",
             (cid,),
         )
         if cursor.fetchone()[0] == 0:
@@ -323,7 +312,7 @@ def test_cdc_throughput_under_load(snowflake_conn, pg_conn):
 
     arrived = wait_for_row_count(
         cursor,
-        f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.POSTGRES_CDC.CUSTOMERS WHERE ID IN ({id_list})",
+        f"SELECT COUNT(DISTINCT _raw_json:id::INTEGER) FROM {SNOWFLAKE_DB}.RAW.PG_CUSTOMERS_RAW WHERE _raw_json:id::INTEGER IN ({id_list})",
         min_rows=int(BATCH_SIZE * 0.95),  # Allow 5% tolerance
         timeout=300,
         poll_interval=10,
