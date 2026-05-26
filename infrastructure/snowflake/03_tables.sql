@@ -138,7 +138,7 @@ USE SCHEMA RAW;
 
 -- Storage integration must be created first — see 04_roles_grants.sql
 CREATE STAGE IF NOT EXISTS OPENFLOW_S3_STAGE
-  URL = 's3://openflow-staging-dev-eu-west-2/staged/'
+  URL = 's3://openflow-staging-dev-eu-west-2/'
   STORAGE_INTEGRATION = OPENFLOW_S3_INTEGRATION
   FILE_FORMAT = (TYPE = 'JSON' STRIP_OUTER_ARRAY = TRUE)
   COMMENT = 'S3 staging area for NiFi-loaded files';
