@@ -20,8 +20,8 @@ from conftest import wait_for_row_count
 
 
 SNOWFLAKE_DB = os.environ.get("SNOWFLAKE_DATABASE", "OPENFLOW_DEV")
-# 60s poll interval + S3 upload + COPY INTO + MERGE = ~3 min end-to-end
-CDC_PROPAGATION_WAIT = int(os.environ.get("CDC_PROPAGATION_WAIT", "180"))
+# 60s poll interval + S3 upload + COPY INTO ~= 65s observed; 90s gives 25s buffer
+CDC_PROPAGATION_WAIT = int(os.environ.get("CDC_PROPAGATION_WAIT", "90"))
 
 
 # ---------------------------------------------------------------------------
@@ -82,7 +82,7 @@ def _get_customer_from_snowflake(snowflake_conn, customer_id: int) -> dict | Non
     return dict(zip(["id", "first_name", "last_name", "email", "status", "cdc_operation"], row))
 
 
-def _poll_customer(snowflake_conn, customer_id: int, *, status: str | None = None, timeout: int = 240) -> dict | None:
+def _poll_customer(snowflake_conn, customer_id: int, *, status: str | None = None, timeout: int = 120) -> dict | None:
     """Poll Snowflake until the customer row (optionally matching status) appears."""
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -98,7 +98,7 @@ def _poll_customer(snowflake_conn, customer_id: int, *, status: str | None = Non
 # INSERT tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.timeout(360)
+@pytest.mark.timeout(180)
 def test_customer_insert_propagates(snowflake_conn, pg_conn):
     """INSERT a new customer in Postgres — it should appear in Snowflake CUSTOMERS."""
     email = _unique_email()
@@ -114,7 +114,7 @@ def test_customer_insert_propagates(snowflake_conn, pg_conn):
     assert row["email"] == email or row.get("cdc_operation") in ("INSERT", "insert")
 
 
-@pytest.mark.timeout(360)
+@pytest.mark.timeout(180)
 def test_order_insert_propagates(snowflake_conn, pg_conn):
     """INSERT a new order — it should appear in Snowflake ORDERS."""
     # Create a customer first
@@ -150,7 +150,7 @@ def test_order_insert_propagates(snowflake_conn, pg_conn):
 # UPDATE tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.timeout(540)
+@pytest.mark.timeout(300)
 def test_customer_update_propagates(snowflake_conn, pg_conn):
     """UPDATE a customer — the change should appear in Snowflake with operation=UPDATE."""
     email = _unique_email()
@@ -183,7 +183,7 @@ def test_customer_update_propagates(snowflake_conn, pg_conn):
 # Soft-delete tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.timeout(540)
+@pytest.mark.timeout(300)
 def test_customer_soft_delete_propagates(snowflake_conn, pg_conn):
     """Soft-delete a customer (status='deleted', updated_at bump) — the change must appear in Snowflake.
 
@@ -216,7 +216,7 @@ def test_customer_soft_delete_propagates(snowflake_conn, pg_conn):
 # Recovery tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.timeout(480)
+@pytest.mark.timeout(300)
 def test_cdc_resumes_after_flow_restart(snowflake_conn, pg_conn, nifi_session):
     """Insert rows while CDC flow is stopped; after restart they must all arrive."""
     from test_salesforce_ingestion import get_pg_id_by_name, schedule_pg

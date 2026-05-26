@@ -144,7 +144,7 @@ def test_no_duplicate_accounts_in_single_batch(snowflake_conn, nifi_session):
     assert total == distinct, f"Duplicate SF IDs within a single batch: total={total} distinct={distinct}"
 
 
-@pytest.mark.timeout(300)
+@pytest.mark.timeout(120)
 def test_flow_recovers_after_stop_restart(snowflake_conn, nifi_session):
     """Stop the Salesforce Ingestion process group, wait, restart it, verify rows continue flowing."""
     pg_id = get_pg_id_by_name(nifi_session, "Salesforce Ingestion")

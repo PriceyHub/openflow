@@ -77,8 +77,8 @@ jobs:
 
       - name: Wait for NiFi processors to start
         run: |
-          echo "Waiting 90s for processors to stabilise after deploy..."
-          sleep 90
+          echo "Waiting 60s for processors to stabilise after deploy..."
+          sleep 60
           echo "Done."
 
       - name: NiFi pipeline diagnostics
