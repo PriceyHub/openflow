@@ -779,8 +779,8 @@
             "resourceDefinition": {
               "cardinality": "MULTIPLE",
               "resourceTypes": [
-                "FILE",
                 "DIRECTORY",
+                "FILE",
                 "URL"
               ]
             },
@@ -834,11 +834,11 @@
         "instanceIdentifier": "4ed2cc1d-4633-3e1c-b1d2-fb1eb4be198b",
         "name": "AWSCredentialsProviderControllerService",
         "properties": {
-          "default-credentials": "false",
+          "default-credentials": "true",
           "Session Time": "3600",
           "assume-role-sts-signer-override": "Default Signature",
           "assume-role-sts-region": "us-west-2",
-          "anonymous-credentials": "true"
+          "anonymous-credentials": "false"
         },
         "propertyDescriptors": {
           "profile-name": {
@@ -902,8 +902,8 @@
             "resourceDefinition": {
               "cardinality": "MULTIPLE",
               "resourceTypes": [
-                "FILE",
-                "DIRECTORY"
+                "DIRECTORY",
+                "FILE"
               ]
             },
             "sensitive": false
@@ -1085,8 +1085,8 @@
             "resourceDefinition": {
               "cardinality": "MULTIPLE",
               "resourceTypes": [
-                "FILE",
                 "DIRECTORY",
+                "FILE",
                 "URL"
               ]
             },
@@ -1877,8 +1877,8 @@
             "resourceDefinition": {
               "cardinality": "MULTIPLE",
               "resourceTypes": [
-                "FILE",
-                "DIRECTORY"
+                "DIRECTORY",
+                "FILE"
               ]
             },
             "sensitive": false
@@ -2076,6 +2076,7 @@
           "y": 350.0
         },
         "properties": {
+          "max-bin-age": "60 sec",
           "correlation-attribute-name": "cdc.table",
           "Attribute Strategy": "Keep Only Common Attributes",
           "min-records": "1",
@@ -2084,8 +2085,7 @@
           "record-reader": "0001b2c3-d4e5-cdc0-0001-000000000001",
           "max-records": "10000",
           "min-bin-size": "0 B",
-          "max.bin.count": "10",
-          "max-bin-age": "60 sec"
+          "max.bin.count": "10"
         },
         "propertyDescriptors": {
           "max-bin-age": {
