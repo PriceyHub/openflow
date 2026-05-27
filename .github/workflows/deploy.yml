@@ -122,6 +122,7 @@ jobs:
         env:
           NIFI_ADMIN_PASSWORD: ${{ secrets.NIFI_ADMIN_PASSWORD }}
           PG_PORT: "5432"
+          CDC_PROPAGATION_WAIT: "150"
         run: |
           pip install pytest pytest-timeout psycopg2-binary snowflake-connector-python nipyapi
           cd tests && pytest -v --timeout=600 -m "not slow" 2>&1
