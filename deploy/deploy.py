@@ -233,6 +233,11 @@ def _delete_stale_process_groups(root_pg_id: str, canonical_name: str) -> None:
 def _update_flow_version_direct(pg_id: str, registry_client_id: str, bucket_id: str, flow_id: str, version: int) -> None:
     """Update a versioned process group to a new registry version in-place via NiFi 2.0 API.
 
+    NiFi 2.0 uses an async update-request pattern:
+      POST /versions/update-requests/process-groups/{id}  — start
+      GET  /versions/update-requests/{requestId}          — poll
+      DELETE /versions/update-requests/{requestId}        — clean up
+
     Preserves processor state (e.g. QueryDatabaseTableRecord watermarks, QuerySalesforceObject
     age-field cursors) unlike the delete+recreate fallback path.
     """
@@ -260,8 +265,8 @@ def _update_flow_version_direct(pg_id: str, registry_client_id: str, bucket_id: 
         },
     }
 
-    resp = _requests.put(
-        f"{nifi_base}/versions/process-groups/{pg_id}",
+    resp = _requests.post(
+        f"{nifi_base}/versions/update-requests/process-groups/{pg_id}",
         json=body,
         headers=headers,
         verify=False,
@@ -269,11 +274,38 @@ def _update_flow_version_direct(pg_id: str, registry_client_id: str, bucket_id: 
     )
     if not resp.ok:
         logger.warning(
-            "NiFi version update failed %s — request body: %s — response: %s",
-            resp.status_code, json.dumps(body), resp.text[:500],
+            "NiFi version update-request failed %s — response: %s",
+            resp.status_code, resp.text[:500],
         )
     resp.raise_for_status()
-    logger.info("Updated PG %s to flow version %d in-place", pg_id, version)
+
+    request_id = resp.json()["request"]["requestId"]
+    logger.info("Version update request %s started for PG %s", request_id, pg_id)
+
+    deadline = time.time() + 120
+    while time.time() < deadline:
+        poll = _requests.get(
+            f"{nifi_base}/versions/update-requests/{request_id}",
+            headers=headers,
+            verify=False,
+            timeout=15,
+        )
+        poll.raise_for_status()
+        req = poll.json()["request"]
+        if req.get("complete"):
+            _requests.delete(
+                f"{nifi_base}/versions/update-requests/{request_id}",
+                headers=headers,
+                verify=False,
+                timeout=15,
+            )
+            if req.get("failureReason"):
+                raise RuntimeError(f"Version update failed: {req['failureReason']}")
+            logger.info("Updated PG %s to flow version %d in-place", pg_id, version)
+            return
+        time.sleep(3)
+
+    raise TimeoutError(f"Version update request {request_id} did not complete within 120s")
 
 
 def _stop_process_group(pg_id: str) -> None:
