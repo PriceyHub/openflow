@@ -3224,7 +3224,8 @@
           "salesforce-api-version": "#{salesforce_api_version}",
           "salesforce-url": "#{salesforce_instance_url}",
           "create-zero-record-files": "false",
-          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0030-000000000030"
+          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0030-000000000030",
+          "age-field": "LastModifiedDate"
         },
         "propertyDescriptors": {
           "age-delay": {
@@ -3362,7 +3363,8 @@
           "salesforce-api-version": "#{salesforce_api_version}",
           "salesforce-url": "#{salesforce_instance_url}",
           "create-zero-record-files": "false",
-          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0030-000000000030"
+          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0030-000000000030",
+          "age-field": "LastModifiedDate"
         },
         "propertyDescriptors": {
           "age-delay": {

@@ -141,11 +141,11 @@ def deploy_flow_to_nifi(
         _stop_process_group(existing.id)
         time.sleep(3)
         try:
-            updated = nipyapi.versioning.update_flow_ver(process_group=existing, target_version=version)
+            _update_flow_version_direct(existing.id, registry_client_id, bucket_id, flow_id, version)
             _update_parameter_context(existing.id, context_id)
             _start_process_group(existing.id)
             logger.info("Updated and restarted: %s", process_group_name)
-            return updated
+            return existing
         except Exception as exc:
             logger.warning(
                 "Could not version-update existing PG '%s' (%s) — deleting and recreating",
@@ -228,6 +228,47 @@ def _delete_stale_process_groups(root_pg_id: str, canonical_name: str) -> None:
             logger.info("Deleted stale process group: %s", pg.component.name)
         except Exception as exc:
             logger.warning("Could not delete stale PG %s: %s", pg.component.name, exc)
+
+
+def _update_flow_version_direct(pg_id: str, registry_client_id: str, bucket_id: str, flow_id: str, version: int) -> None:
+    """Update a versioned process group to a new registry version in-place via NiFi 2.0 API.
+
+    Preserves processor state (e.g. QueryDatabaseTableRecord watermarks, QuerySalesforceObject
+    age-field cursors) unlike the delete+recreate fallback path.
+    """
+    import requests as _requests
+
+    nifi_base = nipyapi.config.nifi_config.host
+    token = (nipyapi.config.nifi_config.api_key or {}).get("tokenAuth", "")
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+    pg_entity = nipyapi.nifi.ProcessGroupsApi().get_process_group(pg_id)
+    revision = pg_entity.revision
+
+    body = {
+        "processGroupRevision": {
+            "version": revision.version,
+            "clientId": revision.client_id or "",
+        },
+        "disconnectedNodeAcknowledged": False,
+        "versionControlInformation": {
+            "groupId": pg_id,
+            "registryId": registry_client_id,
+            "bucketId": bucket_id,
+            "flowId": flow_id,
+            "version": version,
+        },
+    }
+
+    resp = _requests.put(
+        f"{nifi_base}/versions/process-groups/{pg_id}",
+        json=body,
+        headers=headers,
+        verify=False,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    logger.info("Updated PG %s to flow version %d in-place", pg_id, version)
 
 
 def _stop_process_group(pg_id: str) -> None:
