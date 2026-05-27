@@ -256,7 +256,7 @@ def _update_flow_version_direct(pg_id: str, registry_client_id: str, bucket_id: 
             "registryId": registry_client_id,
             "bucketId": bucket_id,
             "flowId": flow_id,
-            "version": version,
+            "version": str(version),
         },
     }
 

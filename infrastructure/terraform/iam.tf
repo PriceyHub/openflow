@@ -22,7 +22,10 @@ data "aws_iam_policy_document" "nifi_s3" {
       "s3:GetObject",
       "s3:DeleteObject",
       "s3:ListBucket",
-      "s3:GetBucketLocation"
+      "s3:GetBucketLocation",
+      "s3:ListBucketMultipartUploads",
+      "s3:AbortMultipartUpload",
+      "s3:ListMultipartUploadParts"
     ]
     resources = [
       aws_s3_bucket.staging.arn,
