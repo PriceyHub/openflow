@@ -1,6 +1,6 @@
 environment                 = "dev"
-nifi_instance_type          = "t3.large"
-nifi_registry_instance_type = "t3.medium"
+nifi_instance_type          = "t3.medium"
+nifi_registry_instance_type = "t3.small"
 nifi_version                = "2.0.0"
 nifi_registry_version       = "2.0.0"
 
