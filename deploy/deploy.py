@@ -267,6 +267,11 @@ def _update_flow_version_direct(pg_id: str, registry_client_id: str, bucket_id: 
         verify=False,
         timeout=30,
     )
+    if not resp.ok:
+        logger.warning(
+            "NiFi version update failed %s — request body: %s — response: %s",
+            resp.status_code, json.dumps(body), resp.text[:500],
+        )
     resp.raise_for_status()
     logger.info("Updated PG %s to flow version %d in-place", pg_id, version)
 
