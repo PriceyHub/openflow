@@ -1346,7 +1346,11 @@
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
         "type": "org.apache.nifi.processors.standard.ExecuteSQL",
-        "yieldDuration": "1 sec"
+        "yieldDuration": "1 sec",
+        "runDurationMillis": 0,
+        "retriedRelationships": [],
+        "retryCount": 3,
+        "style": {}
       },
       {
         "autoTerminatedRelationships": [
@@ -1498,7 +1502,11 @@
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
         "type": "org.apache.nifi.processors.standard.ExecuteSQL",
-        "yieldDuration": "1 sec"
+        "yieldDuration": "1 sec",
+        "runDurationMillis": 0,
+        "retriedRelationships": [],
+        "retryCount": 3,
+        "style": {}
       },
       {
         "autoTerminatedRelationships": [
@@ -1762,7 +1770,11 @@
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
         "type": "org.apache.nifi.processors.standard.ExecuteSQL",
-        "yieldDuration": "1 sec"
+        "yieldDuration": "1 sec",
+        "runDurationMillis": 0,
+        "retriedRelationships": [],
+        "retryCount": 3,
+        "style": {}
       },
       {
         "autoTerminatedRelationships": [
@@ -2026,7 +2038,11 @@
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
         "type": "org.apache.nifi.processors.standard.ExecuteSQL",
-        "yieldDuration": "1 sec"
+        "yieldDuration": "1 sec",
+        "runDurationMillis": 0,
+        "retriedRelationships": [],
+        "retryCount": 3,
+        "style": {}
       },
       {
         "autoTerminatedRelationships": [
