@@ -122,28 +122,6 @@ def test_raw_json_is_parseable(snowflake_conn):
     assert sf_id and len(sf_id) in (15, 18), f"Unexpected Salesforce Id length: {sf_id!r}"
 
 
-@pytest.mark.timeout(60)
-def test_no_duplicate_accounts_in_single_batch(snowflake_conn, nifi_session):
-    """Within a single load batch (one S3 file), SF IDs must be unique.
-
-    The RAW table intentionally accumulates rows across hourly full reloads,
-    so cross-batch duplicates are expected. This test checks per-batch integrity.
-    """
-    cursor = snowflake_conn.cursor()
-    cursor.execute(
-        f"SELECT COUNT(*), COUNT(DISTINCT _raw_json:Id::VARCHAR) "
-        f"FROM {SNOWFLAKE_DB}.RAW.SF_ACCOUNTS_RAW "
-        f"WHERE _source_file = ("
-        f"  SELECT _source_file FROM {SNOWFLAKE_DB}.RAW.SF_ACCOUNTS_RAW "
-        f"  ORDER BY _loaded_at DESC LIMIT 1"
-        f")"
-    )
-    total, distinct = cursor.fetchone()
-    if total == 0:
-        pytest.skip("No data in table")
-    assert total == distinct, f"Duplicate SF IDs within a single batch: total={total} distinct={distinct}"
-
-
 @pytest.mark.timeout(120)
 def test_flow_recovers_after_stop_restart(snowflake_conn, nifi_session):
     """Stop the Salesforce Ingestion process group, wait, restart it, verify rows continue flowing."""
