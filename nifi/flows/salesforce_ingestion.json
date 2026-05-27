@@ -412,6 +412,134 @@
           "type": "PROCESSOR"
         },
         "zIndex": 0
+      },
+      {
+        "backPressureDataSizeThreshold": "1 GB",
+        "backPressureObjectThreshold": 10000,
+        "bends": [],
+        "componentType": "CONNECTION",
+        "destination": {
+          "groupId": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+          "id": "0002b2c3-d4e5-0002-0026-000000000026",
+          "instanceIdentifier": "a1b2c3d4-e5f6-4026-b2c3-d4e5f6000026",
+          "name": "ExecuteSQL - MERGE INTO SF_ACCOUNTS",
+          "type": "PROCESSOR"
+        },
+        "flowFileExpiration": "0 sec",
+        "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+        "identifier": "0002b2c3-d4e5-0002-c026-000000000026",
+        "instanceIdentifier": "b1c2d3e4-f5a6-c026-c3d4-e5f6a0000026",
+        "labelIndex": 1,
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "prioritizers": [],
+        "selectedRelationships": [
+          "success"
+        ],
+        "source": {
+          "groupId": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+          "id": "0002b2c3-d4e5-0002-0016-000000000016",
+          "instanceIdentifier": "48260efc-a94c-309f-497e-afb8d882ed98",
+          "name": "ExecuteSQL - COPY INTO SF_ACCOUNTS_RAW",
+          "type": "PROCESSOR"
+        },
+        "zIndex": 0
+      },
+      {
+        "backPressureDataSizeThreshold": "1 GB",
+        "backPressureObjectThreshold": 10000,
+        "bends": [],
+        "componentType": "CONNECTION",
+        "destination": {
+          "groupId": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+          "id": "0002b2c3-d4e5-0002-0027-000000000027",
+          "instanceIdentifier": "a1b2c3d4-e5f6-4027-b2c3-d4e5f6000027",
+          "name": "ExecuteSQL - MERGE INTO SF_CONTACTS",
+          "type": "PROCESSOR"
+        },
+        "flowFileExpiration": "0 sec",
+        "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+        "identifier": "0002b2c3-d4e5-0002-c027-000000000027",
+        "instanceIdentifier": "b1c2d3e4-f5a6-c027-c3d4-e5f6a0000027",
+        "labelIndex": 1,
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "prioritizers": [],
+        "selectedRelationships": [
+          "success"
+        ],
+        "source": {
+          "groupId": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+          "id": "0002b2c3-d4e5-0002-0017-000000000017",
+          "instanceIdentifier": "3b493f7d-d0bc-362e-95b7-6936535be693",
+          "name": "ExecuteSQL - COPY INTO SF_CONTACTS_RAW",
+          "type": "PROCESSOR"
+        },
+        "zIndex": 0
+      },
+      {
+        "backPressureDataSizeThreshold": "1 GB",
+        "backPressureObjectThreshold": 10000,
+        "bends": [],
+        "componentType": "CONNECTION",
+        "destination": {
+          "groupId": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+          "id": "0002b2c3-d4e5-0002-0028-000000000028",
+          "instanceIdentifier": "a1b2c3d4-e5f6-4028-b2c3-d4e5f6000028",
+          "name": "ExecuteSQL - Soft-Delete SF_ACCOUNTS",
+          "type": "PROCESSOR"
+        },
+        "flowFileExpiration": "0 sec",
+        "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+        "identifier": "0002b2c3-d4e5-0002-c028-000000000028",
+        "instanceIdentifier": "b1c2d3e4-f5a6-c028-c3d4-e5f6a0000028",
+        "labelIndex": 1,
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "prioritizers": [],
+        "selectedRelationships": [
+          "success"
+        ],
+        "source": {
+          "groupId": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+          "id": "0002b2c3-d4e5-0002-0026-000000000026",
+          "instanceIdentifier": "a1b2c3d4-e5f6-4026-b2c3-d4e5f6000026",
+          "name": "ExecuteSQL - MERGE INTO SF_ACCOUNTS",
+          "type": "PROCESSOR"
+        },
+        "zIndex": 0
+      },
+      {
+        "backPressureDataSizeThreshold": "1 GB",
+        "backPressureObjectThreshold": 10000,
+        "bends": [],
+        "componentType": "CONNECTION",
+        "destination": {
+          "groupId": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+          "id": "0002b2c3-d4e5-0002-0029-000000000029",
+          "instanceIdentifier": "a1b2c3d4-e5f6-4029-b2c3-d4e5f6000029",
+          "name": "ExecuteSQL - Soft-Delete SF_CONTACTS",
+          "type": "PROCESSOR"
+        },
+        "flowFileExpiration": "0 sec",
+        "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+        "identifier": "0002b2c3-d4e5-0002-c029-000000000029",
+        "instanceIdentifier": "b1c2d3e4-f5a6-c029-c3d4-e5f6a0000029",
+        "labelIndex": 1,
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "prioritizers": [],
+        "selectedRelationships": [
+          "success"
+        ],
+        "source": {
+          "groupId": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+          "id": "0002b2c3-d4e5-0002-0027-000000000027",
+          "instanceIdentifier": "a1b2c3d4-e5f6-4027-b2c3-d4e5f6000027",
+          "name": "ExecuteSQL - MERGE INTO SF_CONTACTS",
+          "type": "PROCESSOR"
+        },
+        "zIndex": 0
       }
     ],
     "controllerServices": [
@@ -1382,7 +1510,6 @@
       },
       {
         "autoTerminatedRelationships": [
-          "success",
           "failure"
         ],
         "backoffMechanism": "PENALIZE_FLOWFILE",
@@ -1658,7 +1785,6 @@
       },
       {
         "autoTerminatedRelationships": [
-          "success",
           "failure"
         ],
         "backoffMechanism": "PENALIZE_FLOWFILE",
@@ -2802,6 +2928,614 @@
         "schedulingStrategy": "TIMER_DRIVEN",
         "style": {},
         "type": "org.apache.nifi.processors.salesforce.QuerySalesforceObject",
+        "yieldDuration": "1 sec"
+      },
+      {
+        "autoTerminatedRelationships": [
+          "success",
+          "failure"
+        ],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "bulletinLevel": "WARN",
+        "bundle": {
+          "artifact": "nifi-standard-nar",
+          "group": "org.apache.nifi",
+          "version": "2.0.0"
+        },
+        "componentType": "PROCESSOR",
+        "concurrentlySchedulableTaskCount": 1,
+        "executionNode": "ALL",
+        "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+        "identifier": "0002b2c3-d4e5-0002-0026-000000000026",
+        "instanceIdentifier": "a1b2c3d4-e5f6-4026-b2c3-d4e5f6000026",
+        "maxBackoffPeriod": "10 mins",
+        "name": "ExecuteSQL - MERGE INTO SF_ACCOUNTS",
+        "penaltyDuration": "30 sec",
+        "position": {
+          "x": 1900.0,
+          "y": 100.0
+        },
+        "properties": {
+          "esql-max-rows": "0",
+          "dbf-default-precision": "10",
+          "Max Wait Time": "0 millis",
+          "Database Connection Pooling Service": "0002b2c3-d4e5-0002-0011-000000000011",
+          "esql-auto-commit": "true",
+          "dbf-user-logical-types": "false",
+          "dbf-default-scale": "0",
+          "Fetch Size": "0",
+          "compression-format": "NONE",
+          "esql-output-batch-size": "0",
+          "esql-fetch-size": "0",
+          "SQL select query": "MERGE INTO #{snowflake_database}.SALESFORCE.ACCOUNTS AS tgt USING (SELECT _raw_json:Id::VARCHAR(18) AS SF_ID, _raw_json:Name::VARCHAR(255) AS NAME, _raw_json:Industry::VARCHAR(100) AS INDUSTRY, _raw_json:AnnualRevenue::NUMBER(18,2) AS ANNUAL_REVENUE, _raw_json:BillingCity::VARCHAR(100) AS BILLING_CITY, _raw_json:BillingCountry::VARCHAR(100) AS BILLING_COUNTRY, _raw_json:Phone::VARCHAR(40) AS PHONE, _raw_json:Website::VARCHAR(255) AS WEBSITE, _raw_json:NumberOfEmployees::INTEGER AS NUMBER_OF_EMPLOYEES, _raw_json:OwnerId::VARCHAR(18) AS OWNER_ID, _raw_json:CreatedDate::TIMESTAMP_NTZ AS CREATED_DATE, _raw_json:LastModifiedDate::TIMESTAMP_NTZ AS LAST_MODIFIED_DATE, _batch_id FROM #{snowflake_database}.RAW.SF_ACCOUNTS_RAW QUALIFY ROW_NUMBER() OVER (PARTITION BY _raw_json:Id::VARCHAR ORDER BY _LOADED_AT DESC) = 1) AS src ON tgt.SF_ID = src.SF_ID WHEN MATCHED THEN UPDATE SET tgt.NAME=src.NAME, tgt.INDUSTRY=src.INDUSTRY, tgt.ANNUAL_REVENUE=src.ANNUAL_REVENUE, tgt.BILLING_CITY=src.BILLING_CITY, tgt.BILLING_COUNTRY=src.BILLING_COUNTRY, tgt.PHONE=src.PHONE, tgt.WEBSITE=src.WEBSITE, tgt.NUMBER_OF_EMPLOYEES=src.NUMBER_OF_EMPLOYEES, tgt.OWNER_ID=src.OWNER_ID, tgt.LAST_MODIFIED_DATE=src.LAST_MODIFIED_DATE, tgt.IS_DELETED=FALSE, tgt._ETL_LOADED_AT=CURRENT_TIMESTAMP(), tgt._ETL_BATCH_ID=src._BATCH_ID WHEN NOT MATCHED THEN INSERT (SF_ID,NAME,INDUSTRY,ANNUAL_REVENUE,BILLING_CITY,BILLING_COUNTRY,PHONE,WEBSITE,NUMBER_OF_EMPLOYEES,OWNER_ID,CREATED_DATE,LAST_MODIFIED_DATE,IS_DELETED,_ETL_LOADED_AT,_ETL_BATCH_ID) VALUES (src.SF_ID,src.NAME,src.INDUSTRY,src.ANNUAL_REVENUE,src.BILLING_CITY,src.BILLING_COUNTRY,src.PHONE,src.WEBSITE,src.NUMBER_OF_EMPLOYEES,src.OWNER_ID,src.CREATED_DATE,src.LAST_MODIFIED_DATE,FALSE,CURRENT_TIMESTAMP(),src._BATCH_ID)",
+          "Output Batch Size": "0",
+          "dbf-normalize": "false",
+          "Max Rows Per Flow File": "0"
+        },
+        "propertyDescriptors": {
+          "esql-max-rows": {
+            "displayName": "Max Rows Per Flow File",
+            "identifiesControllerService": false,
+            "name": "esql-max-rows",
+            "sensitive": false
+          },
+          "dbf-default-precision": {
+            "displayName": "Default Decimal Precision",
+            "identifiesControllerService": false,
+            "name": "dbf-default-precision",
+            "sensitive": false
+          },
+          "Max Wait Time": {
+            "displayName": "Max Wait Time",
+            "identifiesControllerService": false,
+            "name": "Max Wait Time",
+            "sensitive": false
+          },
+          "Database Connection Pooling Service": {
+            "displayName": "Database Connection Pooling Service",
+            "identifiesControllerService": true,
+            "name": "Database Connection Pooling Service",
+            "sensitive": false
+          },
+          "sql-post-query": {
+            "displayName": "SQL Post-Query",
+            "identifiesControllerService": false,
+            "name": "sql-post-query",
+            "sensitive": false
+          },
+          "esql-auto-commit": {
+            "displayName": "Set Auto Commit",
+            "identifiesControllerService": false,
+            "name": "esql-auto-commit",
+            "sensitive": false
+          },
+          "dbf-user-logical-types": {
+            "displayName": "Use Avro Logical Types",
+            "identifiesControllerService": false,
+            "name": "dbf-user-logical-types",
+            "sensitive": false
+          },
+          "dbf-default-scale": {
+            "displayName": "Default Decimal Scale",
+            "identifiesControllerService": false,
+            "name": "dbf-default-scale",
+            "sensitive": false
+          },
+          "Fetch Size": {
+            "displayName": "Fetch Size",
+            "identifiesControllerService": false,
+            "name": "Fetch Size",
+            "sensitive": false
+          },
+          "sql-pre-query": {
+            "displayName": "SQL Pre-Query",
+            "identifiesControllerService": false,
+            "name": "sql-pre-query",
+            "sensitive": false
+          },
+          "compression-format": {
+            "displayName": "Compression Format",
+            "identifiesControllerService": false,
+            "name": "compression-format",
+            "sensitive": false
+          },
+          "esql-output-batch-size": {
+            "displayName": "Output Batch Size",
+            "identifiesControllerService": false,
+            "name": "esql-output-batch-size",
+            "sensitive": false
+          },
+          "esql-fetch-size": {
+            "displayName": "Fetch Size",
+            "identifiesControllerService": false,
+            "name": "esql-fetch-size",
+            "sensitive": false
+          },
+          "SQL select query": {
+            "displayName": "SQL select query",
+            "identifiesControllerService": false,
+            "name": "SQL select query",
+            "sensitive": false
+          },
+          "Output Batch Size": {
+            "displayName": "Output Batch Size",
+            "identifiesControllerService": false,
+            "name": "Output Batch Size",
+            "sensitive": false
+          },
+          "dbf-normalize": {
+            "displayName": "Normalize Table/Column Names",
+            "identifiesControllerService": false,
+            "name": "dbf-normalize",
+            "sensitive": false
+          },
+          "Max Rows Per Flow File": {
+            "displayName": "Max Rows Per Flow File",
+            "identifiesControllerService": false,
+            "name": "Max Rows Per Flow File",
+            "sensitive": false
+          }
+        },
+        "scheduledState": "RUNNING",
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "type": "org.apache.nifi.processors.standard.ExecuteSQL",
+        "yieldDuration": "1 sec"
+      },
+      {
+        "autoTerminatedRelationships": [
+          "success",
+          "failure"
+        ],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "bulletinLevel": "WARN",
+        "bundle": {
+          "artifact": "nifi-standard-nar",
+          "group": "org.apache.nifi",
+          "version": "2.0.0"
+        },
+        "componentType": "PROCESSOR",
+        "concurrentlySchedulableTaskCount": 1,
+        "executionNode": "ALL",
+        "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+        "identifier": "0002b2c3-d4e5-0002-0027-000000000027",
+        "instanceIdentifier": "a1b2c3d4-e5f6-4027-b2c3-d4e5f6000027",
+        "maxBackoffPeriod": "10 mins",
+        "name": "ExecuteSQL - MERGE INTO SF_CONTACTS",
+        "penaltyDuration": "30 sec",
+        "position": {
+          "x": 1900.0,
+          "y": 400.0
+        },
+        "properties": {
+          "esql-max-rows": "0",
+          "dbf-default-precision": "10",
+          "Max Wait Time": "0 millis",
+          "Database Connection Pooling Service": "0002b2c3-d4e5-0002-0011-000000000011",
+          "esql-auto-commit": "true",
+          "dbf-user-logical-types": "false",
+          "dbf-default-scale": "0",
+          "Fetch Size": "0",
+          "compression-format": "NONE",
+          "esql-output-batch-size": "0",
+          "esql-fetch-size": "0",
+          "SQL select query": "MERGE INTO #{snowflake_database}.SALESFORCE.CONTACTS AS tgt USING (SELECT _raw_json:Id::VARCHAR(18) AS SF_ID, _raw_json:AccountId::VARCHAR(18) AS ACCOUNT_ID, _raw_json:FirstName::VARCHAR(40) AS FIRST_NAME, _raw_json:LastName::VARCHAR(80) AS LAST_NAME, _raw_json:Email::VARCHAR(80) AS EMAIL, _raw_json:Phone::VARCHAR(40) AS PHONE, _raw_json:Title::VARCHAR(128) AS TITLE, _raw_json:Department::VARCHAR(80) AS DEPARTMENT, _raw_json:LeadSource::VARCHAR(40) AS LEAD_SOURCE, _raw_json:OwnerId::VARCHAR(18) AS OWNER_ID, _raw_json:CreatedDate::TIMESTAMP_NTZ AS CREATED_DATE, _raw_json:LastModifiedDate::TIMESTAMP_NTZ AS LAST_MODIFIED_DATE, _batch_id FROM #{snowflake_database}.RAW.SF_CONTACTS_RAW QUALIFY ROW_NUMBER() OVER (PARTITION BY _raw_json:Id::VARCHAR ORDER BY _LOADED_AT DESC) = 1) AS src ON tgt.SF_ID = src.SF_ID WHEN MATCHED THEN UPDATE SET tgt.ACCOUNT_ID=src.ACCOUNT_ID, tgt.FIRST_NAME=src.FIRST_NAME, tgt.LAST_NAME=src.LAST_NAME, tgt.EMAIL=src.EMAIL, tgt.PHONE=src.PHONE, tgt.TITLE=src.TITLE, tgt.DEPARTMENT=src.DEPARTMENT, tgt.LEAD_SOURCE=src.LEAD_SOURCE, tgt.OWNER_ID=src.OWNER_ID, tgt.LAST_MODIFIED_DATE=src.LAST_MODIFIED_DATE, tgt.IS_DELETED=FALSE, tgt._ETL_LOADED_AT=CURRENT_TIMESTAMP(), tgt._ETL_BATCH_ID=src._BATCH_ID WHEN NOT MATCHED THEN INSERT (SF_ID,ACCOUNT_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,TITLE,DEPARTMENT,LEAD_SOURCE,OWNER_ID,CREATED_DATE,LAST_MODIFIED_DATE,IS_DELETED,_ETL_LOADED_AT,_ETL_BATCH_ID) VALUES (src.SF_ID,src.ACCOUNT_ID,src.FIRST_NAME,src.LAST_NAME,src.EMAIL,src.PHONE,src.TITLE,src.DEPARTMENT,src.LEAD_SOURCE,src.OWNER_ID,src.CREATED_DATE,src.LAST_MODIFIED_DATE,FALSE,CURRENT_TIMESTAMP(),src._BATCH_ID)",
+          "Output Batch Size": "0",
+          "dbf-normalize": "false",
+          "Max Rows Per Flow File": "0"
+        },
+        "propertyDescriptors": {
+          "esql-max-rows": {
+            "displayName": "Max Rows Per Flow File",
+            "identifiesControllerService": false,
+            "name": "esql-max-rows",
+            "sensitive": false
+          },
+          "dbf-default-precision": {
+            "displayName": "Default Decimal Precision",
+            "identifiesControllerService": false,
+            "name": "dbf-default-precision",
+            "sensitive": false
+          },
+          "Max Wait Time": {
+            "displayName": "Max Wait Time",
+            "identifiesControllerService": false,
+            "name": "Max Wait Time",
+            "sensitive": false
+          },
+          "Database Connection Pooling Service": {
+            "displayName": "Database Connection Pooling Service",
+            "identifiesControllerService": true,
+            "name": "Database Connection Pooling Service",
+            "sensitive": false
+          },
+          "sql-post-query": {
+            "displayName": "SQL Post-Query",
+            "identifiesControllerService": false,
+            "name": "sql-post-query",
+            "sensitive": false
+          },
+          "esql-auto-commit": {
+            "displayName": "Set Auto Commit",
+            "identifiesControllerService": false,
+            "name": "esql-auto-commit",
+            "sensitive": false
+          },
+          "dbf-user-logical-types": {
+            "displayName": "Use Avro Logical Types",
+            "identifiesControllerService": false,
+            "name": "dbf-user-logical-types",
+            "sensitive": false
+          },
+          "dbf-default-scale": {
+            "displayName": "Default Decimal Scale",
+            "identifiesControllerService": false,
+            "name": "dbf-default-scale",
+            "sensitive": false
+          },
+          "Fetch Size": {
+            "displayName": "Fetch Size",
+            "identifiesControllerService": false,
+            "name": "Fetch Size",
+            "sensitive": false
+          },
+          "sql-pre-query": {
+            "displayName": "SQL Pre-Query",
+            "identifiesControllerService": false,
+            "name": "sql-pre-query",
+            "sensitive": false
+          },
+          "compression-format": {
+            "displayName": "Compression Format",
+            "identifiesControllerService": false,
+            "name": "compression-format",
+            "sensitive": false
+          },
+          "esql-output-batch-size": {
+            "displayName": "Output Batch Size",
+            "identifiesControllerService": false,
+            "name": "esql-output-batch-size",
+            "sensitive": false
+          },
+          "esql-fetch-size": {
+            "displayName": "Fetch Size",
+            "identifiesControllerService": false,
+            "name": "esql-fetch-size",
+            "sensitive": false
+          },
+          "SQL select query": {
+            "displayName": "SQL select query",
+            "identifiesControllerService": false,
+            "name": "SQL select query",
+            "sensitive": false
+          },
+          "Output Batch Size": {
+            "displayName": "Output Batch Size",
+            "identifiesControllerService": false,
+            "name": "Output Batch Size",
+            "sensitive": false
+          },
+          "dbf-normalize": {
+            "displayName": "Normalize Table/Column Names",
+            "identifiesControllerService": false,
+            "name": "dbf-normalize",
+            "sensitive": false
+          },
+          "Max Rows Per Flow File": {
+            "displayName": "Max Rows Per Flow File",
+            "identifiesControllerService": false,
+            "name": "Max Rows Per Flow File",
+            "sensitive": false
+          }
+        },
+        "scheduledState": "RUNNING",
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "type": "org.apache.nifi.processors.standard.ExecuteSQL",
+        "yieldDuration": "1 sec"
+      },
+      {
+        "autoTerminatedRelationships": [
+          "success",
+          "failure"
+        ],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "bulletinLevel": "WARN",
+        "bundle": {
+          "artifact": "nifi-standard-nar",
+          "group": "org.apache.nifi",
+          "version": "2.0.0"
+        },
+        "componentType": "PROCESSOR",
+        "concurrentlySchedulableTaskCount": 1,
+        "executionNode": "ALL",
+        "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+        "identifier": "0002b2c3-d4e5-0002-0028-000000000028",
+        "instanceIdentifier": "a1b2c3d4-e5f6-4028-b2c3-d4e5f6000028",
+        "maxBackoffPeriod": "10 mins",
+        "name": "ExecuteSQL - Soft-Delete SF_ACCOUNTS",
+        "penaltyDuration": "30 sec",
+        "position": {
+          "x": 2200.0,
+          "y": 100.0
+        },
+        "properties": {
+          "esql-max-rows": "0",
+          "dbf-default-precision": "10",
+          "Max Wait Time": "0 millis",
+          "Database Connection Pooling Service": "0002b2c3-d4e5-0002-0011-000000000011",
+          "esql-auto-commit": "true",
+          "dbf-user-logical-types": "false",
+          "dbf-default-scale": "0",
+          "Fetch Size": "0",
+          "compression-format": "NONE",
+          "esql-output-batch-size": "0",
+          "esql-fetch-size": "0",
+          "SQL select query": "UPDATE #{snowflake_database}.SALESFORCE.ACCOUNTS SET IS_DELETED=TRUE, _ETL_LOADED_AT=CURRENT_TIMESTAMP() WHERE IS_DELETED=FALSE AND SF_ID NOT IN (SELECT _raw_json:Id::VARCHAR(18) FROM #{snowflake_database}.RAW.SF_ACCOUNTS_RAW WHERE _loaded_at >= DATEADD('hour', -2, CURRENT_TIMESTAMP()))",
+          "Output Batch Size": "0",
+          "dbf-normalize": "false",
+          "Max Rows Per Flow File": "0"
+        },
+        "propertyDescriptors": {
+          "esql-max-rows": {
+            "displayName": "Max Rows Per Flow File",
+            "identifiesControllerService": false,
+            "name": "esql-max-rows",
+            "sensitive": false
+          },
+          "dbf-default-precision": {
+            "displayName": "Default Decimal Precision",
+            "identifiesControllerService": false,
+            "name": "dbf-default-precision",
+            "sensitive": false
+          },
+          "Max Wait Time": {
+            "displayName": "Max Wait Time",
+            "identifiesControllerService": false,
+            "name": "Max Wait Time",
+            "sensitive": false
+          },
+          "Database Connection Pooling Service": {
+            "displayName": "Database Connection Pooling Service",
+            "identifiesControllerService": true,
+            "name": "Database Connection Pooling Service",
+            "sensitive": false
+          },
+          "sql-post-query": {
+            "displayName": "SQL Post-Query",
+            "identifiesControllerService": false,
+            "name": "sql-post-query",
+            "sensitive": false
+          },
+          "esql-auto-commit": {
+            "displayName": "Set Auto Commit",
+            "identifiesControllerService": false,
+            "name": "esql-auto-commit",
+            "sensitive": false
+          },
+          "dbf-user-logical-types": {
+            "displayName": "Use Avro Logical Types",
+            "identifiesControllerService": false,
+            "name": "dbf-user-logical-types",
+            "sensitive": false
+          },
+          "dbf-default-scale": {
+            "displayName": "Default Decimal Scale",
+            "identifiesControllerService": false,
+            "name": "dbf-default-scale",
+            "sensitive": false
+          },
+          "Fetch Size": {
+            "displayName": "Fetch Size",
+            "identifiesControllerService": false,
+            "name": "Fetch Size",
+            "sensitive": false
+          },
+          "sql-pre-query": {
+            "displayName": "SQL Pre-Query",
+            "identifiesControllerService": false,
+            "name": "sql-pre-query",
+            "sensitive": false
+          },
+          "compression-format": {
+            "displayName": "Compression Format",
+            "identifiesControllerService": false,
+            "name": "compression-format",
+            "sensitive": false
+          },
+          "esql-output-batch-size": {
+            "displayName": "Output Batch Size",
+            "identifiesControllerService": false,
+            "name": "esql-output-batch-size",
+            "sensitive": false
+          },
+          "esql-fetch-size": {
+            "displayName": "Fetch Size",
+            "identifiesControllerService": false,
+            "name": "esql-fetch-size",
+            "sensitive": false
+          },
+          "SQL select query": {
+            "displayName": "SQL select query",
+            "identifiesControllerService": false,
+            "name": "SQL select query",
+            "sensitive": false
+          },
+          "Output Batch Size": {
+            "displayName": "Output Batch Size",
+            "identifiesControllerService": false,
+            "name": "Output Batch Size",
+            "sensitive": false
+          },
+          "dbf-normalize": {
+            "displayName": "Normalize Table/Column Names",
+            "identifiesControllerService": false,
+            "name": "dbf-normalize",
+            "sensitive": false
+          },
+          "Max Rows Per Flow File": {
+            "displayName": "Max Rows Per Flow File",
+            "identifiesControllerService": false,
+            "name": "Max Rows Per Flow File",
+            "sensitive": false
+          }
+        },
+        "scheduledState": "RUNNING",
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "type": "org.apache.nifi.processors.standard.ExecuteSQL",
+        "yieldDuration": "1 sec"
+      },
+      {
+        "autoTerminatedRelationships": [
+          "success",
+          "failure"
+        ],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "bulletinLevel": "WARN",
+        "bundle": {
+          "artifact": "nifi-standard-nar",
+          "group": "org.apache.nifi",
+          "version": "2.0.0"
+        },
+        "componentType": "PROCESSOR",
+        "concurrentlySchedulableTaskCount": 1,
+        "executionNode": "ALL",
+        "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
+        "identifier": "0002b2c3-d4e5-0002-0029-000000000029",
+        "instanceIdentifier": "a1b2c3d4-e5f6-4029-b2c3-d4e5f6000029",
+        "maxBackoffPeriod": "10 mins",
+        "name": "ExecuteSQL - Soft-Delete SF_CONTACTS",
+        "penaltyDuration": "30 sec",
+        "position": {
+          "x": 2200.0,
+          "y": 400.0
+        },
+        "properties": {
+          "esql-max-rows": "0",
+          "dbf-default-precision": "10",
+          "Max Wait Time": "0 millis",
+          "Database Connection Pooling Service": "0002b2c3-d4e5-0002-0011-000000000011",
+          "esql-auto-commit": "true",
+          "dbf-user-logical-types": "false",
+          "dbf-default-scale": "0",
+          "Fetch Size": "0",
+          "compression-format": "NONE",
+          "esql-output-batch-size": "0",
+          "esql-fetch-size": "0",
+          "SQL select query": "UPDATE #{snowflake_database}.SALESFORCE.CONTACTS SET IS_DELETED=TRUE, _ETL_LOADED_AT=CURRENT_TIMESTAMP() WHERE IS_DELETED=FALSE AND SF_ID NOT IN (SELECT _raw_json:Id::VARCHAR(18) FROM #{snowflake_database}.RAW.SF_CONTACTS_RAW WHERE _loaded_at >= DATEADD('hour', -2, CURRENT_TIMESTAMP()))",
+          "Output Batch Size": "0",
+          "dbf-normalize": "false",
+          "Max Rows Per Flow File": "0"
+        },
+        "propertyDescriptors": {
+          "esql-max-rows": {
+            "displayName": "Max Rows Per Flow File",
+            "identifiesControllerService": false,
+            "name": "esql-max-rows",
+            "sensitive": false
+          },
+          "dbf-default-precision": {
+            "displayName": "Default Decimal Precision",
+            "identifiesControllerService": false,
+            "name": "dbf-default-precision",
+            "sensitive": false
+          },
+          "Max Wait Time": {
+            "displayName": "Max Wait Time",
+            "identifiesControllerService": false,
+            "name": "Max Wait Time",
+            "sensitive": false
+          },
+          "Database Connection Pooling Service": {
+            "displayName": "Database Connection Pooling Service",
+            "identifiesControllerService": true,
+            "name": "Database Connection Pooling Service",
+            "sensitive": false
+          },
+          "sql-post-query": {
+            "displayName": "SQL Post-Query",
+            "identifiesControllerService": false,
+            "name": "sql-post-query",
+            "sensitive": false
+          },
+          "esql-auto-commit": {
+            "displayName": "Set Auto Commit",
+            "identifiesControllerService": false,
+            "name": "esql-auto-commit",
+            "sensitive": false
+          },
+          "dbf-user-logical-types": {
+            "displayName": "Use Avro Logical Types",
+            "identifiesControllerService": false,
+            "name": "dbf-user-logical-types",
+            "sensitive": false
+          },
+          "dbf-default-scale": {
+            "displayName": "Default Decimal Scale",
+            "identifiesControllerService": false,
+            "name": "dbf-default-scale",
+            "sensitive": false
+          },
+          "Fetch Size": {
+            "displayName": "Fetch Size",
+            "identifiesControllerService": false,
+            "name": "Fetch Size",
+            "sensitive": false
+          },
+          "sql-pre-query": {
+            "displayName": "SQL Pre-Query",
+            "identifiesControllerService": false,
+            "name": "sql-pre-query",
+            "sensitive": false
+          },
+          "compression-format": {
+            "displayName": "Compression Format",
+            "identifiesControllerService": false,
+            "name": "compression-format",
+            "sensitive": false
+          },
+          "esql-output-batch-size": {
+            "displayName": "Output Batch Size",
+            "identifiesControllerService": false,
+            "name": "esql-output-batch-size",
+            "sensitive": false
+          },
+          "esql-fetch-size": {
+            "displayName": "Fetch Size",
+            "identifiesControllerService": false,
+            "name": "esql-fetch-size",
+            "sensitive": false
+          },
+          "SQL select query": {
+            "displayName": "SQL select query",
+            "identifiesControllerService": false,
+            "name": "SQL select query",
+            "sensitive": false
+          },
+          "Output Batch Size": {
+            "displayName": "Output Batch Size",
+            "identifiesControllerService": false,
+            "name": "Output Batch Size",
+            "sensitive": false
+          },
+          "dbf-normalize": {
+            "displayName": "Normalize Table/Column Names",
+            "identifiesControllerService": false,
+            "name": "dbf-normalize",
+            "sensitive": false
+          },
+          "Max Rows Per Flow File": {
+            "displayName": "Max Rows Per Flow File",
+            "identifiesControllerService": false,
+            "name": "Max Rows Per Flow File",
+            "sensitive": false
+          }
+        },
+        "scheduledState": "RUNNING",
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "type": "org.apache.nifi.processors.standard.ExecuteSQL",
         "yieldDuration": "1 sec"
       }
     ],

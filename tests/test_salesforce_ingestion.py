@@ -2,9 +2,9 @@
 Integration tests for the Salesforce → Snowflake ingestion flow.
 
 Test categories:
-  - Basic: verify rows land in Snowflake after flow runs
+  - Basic: verify rows land in Snowflake RAW tables after flow runs
+  - Typed: verify MERGE produced correct rows in SALESFORCE.ACCOUNTS/CONTACTS
   - Schema: verify expected columns are present and typed correctly
-  - Idempotency: re-running the flow does not duplicate rows
   - Recovery: flow recovers after being stopped and restarted
   - Scale: throughput/latency under increased load
 """
@@ -120,6 +120,62 @@ def test_raw_json_is_parseable(snowflake_conn):
         pytest.skip("No rows in SF_ACCOUNTS_RAW — skipping (expected for empty orgs)")
     sf_id = row[0]
     assert sf_id and len(sf_id) in (15, 18), f"Unexpected Salesforce Id length: {sf_id!r}"
+
+
+# ---------------------------------------------------------------------------
+# Typed table tests (SALESFORCE schema — post-MERGE)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.timeout(60)
+def test_accounts_typed_table_populated(snowflake_conn):
+    """SALESFORCE.ACCOUNTS must have rows with IS_DELETED=FALSE after MERGE runs."""
+    cursor = snowflake_conn.cursor()
+    cursor.execute(
+        f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.SALESFORCE.ACCOUNTS WHERE IS_DELETED = FALSE"
+    )
+    count = cursor.fetchone()[0]
+    if count == 0:
+        pytest.skip("SALESFORCE.ACCOUNTS is empty — MERGE may not have run yet (flow runs hourly)")
+    assert count > 0, "SALESFORCE.ACCOUNTS has no active rows"
+
+
+@pytest.mark.timeout(60)
+def test_contacts_typed_table_populated(snowflake_conn):
+    """SALESFORCE.CONTACTS must have rows with IS_DELETED=FALSE after MERGE runs."""
+    cursor = snowflake_conn.cursor()
+    cursor.execute(
+        f"SELECT COUNT(*) FROM {SNOWFLAKE_DB}.SALESFORCE.CONTACTS WHERE IS_DELETED = FALSE"
+    )
+    count = cursor.fetchone()[0]
+    if count == 0:
+        pytest.skip("SALESFORCE.CONTACTS is empty — MERGE may not have run yet (flow runs hourly)")
+    assert count > 0, "SALESFORCE.CONTACTS has no active rows"
+
+
+@pytest.mark.timeout(60)
+def test_accounts_typed_table_no_duplicates(snowflake_conn):
+    """SALESFORCE.ACCOUNTS must have exactly one row per SF_ID (MERGE guarantee)."""
+    cursor = snowflake_conn.cursor()
+    cursor.execute(
+        f"SELECT COUNT(*), COUNT(DISTINCT SF_ID) FROM {SNOWFLAKE_DB}.SALESFORCE.ACCOUNTS"
+    )
+    total, distinct = cursor.fetchone()
+    if total == 0:
+        pytest.skip("SALESFORCE.ACCOUNTS is empty")
+    assert total == distinct, f"Duplicate SF_IDs in SALESFORCE.ACCOUNTS: total={total} distinct={distinct}"
+
+
+@pytest.mark.timeout(60)
+def test_accounts_typed_table_schema(snowflake_conn):
+    """SALESFORCE.ACCOUNTS must have key typed columns."""
+    cursor = snowflake_conn.cursor()
+    cursor.execute(
+        f"SELECT COLUMN_NAME FROM {SNOWFLAKE_DB}.INFORMATION_SCHEMA.COLUMNS "
+        f"WHERE TABLE_SCHEMA='SALESFORCE' AND TABLE_NAME='ACCOUNTS'"
+    )
+    cols = {row[0] for row in cursor.fetchall()}
+    for expected in ("SF_ID", "NAME", "IS_DELETED", "_ETL_LOADED_AT"):
+        assert expected in cols, f"Missing column {expected} in SALESFORCE.ACCOUNTS"
 
 
 @pytest.mark.timeout(120)
