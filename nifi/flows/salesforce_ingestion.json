@@ -624,7 +624,7 @@
           }
         ],
         "groupIdentifier": "de189657-6aa5-3175-bfab-ad1a7a0eecd5",
-        "identifier": "0002b2c3-d4e5-0002-0014-000000000014",
+        "identifier": "0002b2c3-d4e5-0002-0030-000000000030",
         "instanceIdentifier": "a94d68f5-821c-3d50-7e14-deb6c400b06d",
         "name": "SalesforceOAuth2",
         "properties": {
@@ -3208,7 +3208,7 @@
           "salesforce-api-version": "54.0",
           "salesforce-url": "#{salesforce_instance_url}",
           "create-zero-record-files": "false",
-          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0014-000000000014"
+          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0030-000000000030"
         },
         "propertyDescriptors": {
           "age-delay": {
@@ -3346,7 +3346,7 @@
           "salesforce-api-version": "54.0",
           "salesforce-url": "#{salesforce_instance_url}",
           "create-zero-record-files": "false",
-          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0014-000000000014"
+          "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0030-000000000030"
         },
         "propertyDescriptors": {
           "age-delay": {
