@@ -3221,7 +3221,7 @@
           "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
           "include-deleted-records": "false",
           "sobject-name": "Account",
-          "salesforce-api-version": "54.0",
+          "salesforce-api-version": "#{salesforce_api_version}",
           "salesforce-url": "#{salesforce_instance_url}",
           "create-zero-record-files": "false",
           "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0030-000000000030"
@@ -3359,7 +3359,7 @@
           "record-writer": "0002b2c3-d4e5-0002-0013-000000000013",
           "include-deleted-records": "false",
           "sobject-name": "Contact",
-          "salesforce-api-version": "54.0",
+          "salesforce-api-version": "#{salesforce_api_version}",
           "salesforce-url": "#{salesforce_instance_url}",
           "create-zero-record-files": "false",
           "oauth2-access-token-provider": "0002b2c3-d4e5-0002-0030-000000000030"
